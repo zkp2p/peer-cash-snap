@@ -497,11 +497,11 @@ export async function handleRpcRequest(
           }
         }
 
-        views.sort(
-          (first, second) =>
-            (second.createdAt ?? second.updatedAt ?? 0) -
-            (first.createdAt ?? first.updatedAt ?? 0),
-        );
+        // createdAt is unix ms (snap-tracked); updatedAt is unix seconds
+        // (indexer) - normalize to ms so the newest-first sort is honest.
+        const sortKey = (view: OrderView): number =>
+          view.createdAt ?? (view.updatedAt ? view.updatedAt * 1000 : 0);
+        views.sort((first, second) => sortKey(second) - sortKey(first));
         return { orders: views as unknown as Json };
       }
 

@@ -77,7 +77,7 @@ jobs:
           name: snap-${{ runner.os }}-${{ github.sha }}
           path: ./packages/snap/dist
       - name: Run e2e tests
-        run: yarn workspace snap run test
+        run: yarn workspace @zkp2p/peer-cash-snap run test
       - name: Require clean working directory
         shell: bash
         run: |

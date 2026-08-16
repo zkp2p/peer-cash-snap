@@ -267,9 +267,7 @@ export const OrdersPanel = ({
                   Withdraw
                 </button>
               ) : null}
-              {order.nextActions.includes('topUp') ||
-              order.nextActions.includes('top-up') ||
-              order.isInFlight ? (
+              {order.isInFlight ? (
                 <>
                   <SmallInput
                     inputMode="decimal"

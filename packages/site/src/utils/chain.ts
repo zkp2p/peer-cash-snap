@@ -129,6 +129,9 @@ export async function executePlan(
           to: tx.to,
           data: tx.data,
           value: `0x${BigInt(tx.value).toString(16)}`,
+          // MetaMask rejects the transaction if this does not match the
+          // active chain, so a mid-plan network switch cannot misroute it.
+          chainId: `0x${tx.chainId.toString(16)}`,
         },
       ],
     })) as string;
