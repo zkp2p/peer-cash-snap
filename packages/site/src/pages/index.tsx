@@ -1,20 +1,19 @@
+import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import {
+  CashoutPanel,
   ConnectButton,
   InstallFlaskButton,
+  OrdersPanel,
   ReconnectButton,
-  SendHelloButton,
   Card,
 } from '../components';
 import { defaultSnapOrigin } from '../config';
-import {
-  useMetaMask,
-  useInvokeSnap,
-  useMetaMaskContext,
-  useRequestSnap,
-} from '../hooks';
+import { useMetaMask, useMetaMaskContext, useRequestSnap } from '../hooks';
+import type { CapabilitiesView } from '../types/cash';
 import { isLocalSnap, shouldDisplayReconnectButton } from '../utils';
+import { invokeCash, shorten } from '../utils/cash';
 
 const Container = styled.div`
   display: flex;
@@ -47,6 +46,8 @@ const Subtitle = styled.p`
   font-weight: 500;
   margin-top: 0;
   margin-bottom: 0;
+  text-align: center;
+  max-width: 64.8rem;
   ${({ theme }) => theme.mediaQueries.small} {
     font-size: ${({ theme }) => theme.fontSizes.text};
   }
@@ -63,25 +64,6 @@ const CardContainer = styled.div`
   margin-top: 1.5rem;
 `;
 
-const Notice = styled.div`
-  background-color: ${({ theme }) => theme.colors.background?.alternative};
-  border: 1px solid ${({ theme }) => theme.colors.border?.default};
-  color: ${({ theme }) => theme.colors.text?.alternative};
-  border-radius: ${({ theme }) => theme.radii.default};
-  padding: 2.4rem;
-  margin-top: 2.4rem;
-  max-width: 60rem;
-  width: 100%;
-
-  & > * {
-    margin: 0;
-  }
-  ${({ theme }) => theme.mediaQueries.small} {
-    margin-top: 1.2rem;
-    padding: 1.6rem;
-  }
-`;
-
 const ErrorMessage = styled.div`
   background-color: ${({ theme }) => theme.colors.error?.muted};
   border: 1px solid ${({ theme }) => theme.colors.error?.default};
@@ -92,6 +74,7 @@ const ErrorMessage = styled.div`
   margin-top: 2.4rem;
   max-width: 60rem;
   width: 100%;
+  word-break: break-word;
   ${({ theme }) => theme.mediaQueries.small} {
     padding: 1.6rem;
     margin-bottom: 1.2rem;
@@ -100,27 +83,131 @@ const ErrorMessage = styled.div`
   }
 `;
 
+const ToolbarRow = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  margin-top: 2.4rem;
+  max-width: 64.8rem;
+  width: 100%;
+  justify-content: space-between;
+`;
+
+const AccountBadge = styled.code`
+  font-size: ${({ theme }) => theme.fontSizes.small};
+`;
+
+const EnvSelect = styled.select`
+  font-size: ${({ theme }) => theme.fontSizes.small};
+  padding: 0.6rem;
+  border: 1px solid ${({ theme }) => theme.colors.border?.default};
+  border-radius: ${({ theme }) => theme.radii.default};
+  background: ${({ theme }) => theme.colors.background?.default};
+  color: ${({ theme }) => theme.colors.text?.default};
+`;
+
+const ENVIRONMENTS = ['production', 'preproduction', 'staging'] as const;
+
 const Index = () => {
-  const { error } = useMetaMaskContext();
+  const { error, provider, setError } = useMetaMaskContext();
   const { isFlask, snapsDetected, installedSnap } = useMetaMask();
   const requestSnap = useRequestSnap();
-  const invokeSnap = useInvokeSnap();
+
+  const [account, setAccount] = useState<string | null>(null);
+  const [capabilities, setCapabilities] = useState<CapabilitiesView | null>(
+    null,
+  );
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const isMetaMaskReady = isLocalSnap(defaultSnapOrigin)
     ? isFlask
     : snapsDetected;
 
-  const handleSendHelloClick = async () => {
-    await invokeSnap({ method: 'hello' });
+  const loadCapabilities = useCallback(async () => {
+    if (!provider || !installedSnap) {
+      return;
+    }
+    try {
+      const result = await invokeCash<{ capabilities: CapabilitiesView }>(
+        provider,
+        'cash_getCapabilities',
+      );
+      setCapabilities(result.capabilities);
+    } catch (capsError) {
+      setError(
+        capsError instanceof Error
+          ? capsError
+          : new Error('Failed to load capabilities'),
+      );
+    }
+  }, [provider, installedSnap, setError]);
+
+  useEffect(() => {
+    loadCapabilities().catch(() => undefined);
+  }, [loadCapabilities]);
+
+  useEffect(() => {
+    if (!provider) {
+      return undefined;
+    }
+    const handler = (...args: unknown[]) => {
+      const [accounts] = args as [string[]];
+      setAccount(accounts?.[0] ?? null);
+    };
+    provider.on('accountsChanged', handler);
+    return () => {
+      provider.removeListener('accountsChanged', handler);
+    };
+  }, [provider]);
+
+  const connectAccount = async () => {
+    if (!provider) {
+      return;
+    }
+    try {
+      const accounts = (await provider.request({
+        method: 'eth_requestAccounts',
+      })) as string[];
+      setAccount(accounts?.[0] ?? null);
+    } catch (accountError) {
+      setError(
+        accountError instanceof Error
+          ? accountError
+          : new Error('Failed to connect an account'),
+      );
+    }
+  };
+
+  const switchEnvironment = async (environment: string) => {
+    if (
+      !provider ||
+      !capabilities ||
+      environment === capabilities.environment
+    ) {
+      return;
+    }
+    try {
+      await invokeCash(provider, 'cash_setEnvironment', { environment });
+      await loadCapabilities();
+      setRefreshKey((key) => key + 1);
+    } catch {
+      // User declined the switch in the snap dialog; keep the current value.
+      await loadCapabilities();
+    }
   };
 
   return (
     <Container>
       <Heading>
-        Welcome to <Span>template-snap</Span>
+        <Span>Peer Cash</Span> · cash out USDC from MetaMask
       </Heading>
       <Subtitle>
-        Get started by editing <code>src/index.tsx</code>
+        Escrow Base USDC in the ZKP2P protocol and get paid on a fiat rail at
+        the live oracle rate. The snap reviews every request, returns unsigned
+        transactions, and tracks your orders; MetaMask confirms every
+        transaction.
       </Subtitle>
       <CardContainer>
         {error && (
@@ -131,7 +218,7 @@ const Index = () => {
         {!isMetaMaskReady && (
           <Card
             content={{
-              title: 'Install',
+              title: 'Install MetaMask Flask',
               description:
                 'Snaps is pre-release software only available in MetaMask Flask, a canary distribution for developers with access to upcoming features.',
               button: <InstallFlaskButton />,
@@ -142,9 +229,9 @@ const Index = () => {
         {!installedSnap && (
           <Card
             content={{
-              title: 'Connect',
+              title: 'Install the Peer Cash snap',
               description:
-                'Get started by connecting to and installing the example snap.',
+                'Connect MetaMask and install the Peer Cash snap to start cashing out.',
               button: (
                 <ConnectButton
                   onClick={requestSnap}
@@ -153,6 +240,7 @@ const Index = () => {
               ),
             }}
             disabled={!isMetaMaskReady}
+            fullWidth
           />
         )}
         {shouldDisplayReconnectButton(installedSnap) && (
@@ -160,7 +248,7 @@ const Index = () => {
             content={{
               title: 'Reconnect',
               description:
-                'While connected to a local running snap this button will always be displayed in order to update the snap if a change is made.',
+                'While connected to a locally running snap, this button re-installs the latest local build.',
               button: (
                 <ReconnectButton
                   onClick={requestSnap}
@@ -169,36 +257,63 @@ const Index = () => {
               ),
             }}
             disabled={!installedSnap}
+            fullWidth
           />
         )}
-        <Card
-          content={{
-            title: 'Send Hello message',
-            description:
-              'Display a custom message within a confirmation screen in MetaMask.',
-            button: (
-              <SendHelloButton
-                onClick={handleSendHelloClick}
-                disabled={!installedSnap}
-              />
-            ),
-          }}
-          disabled={!installedSnap}
-          fullWidth={
-            isMetaMaskReady &&
-            Boolean(installedSnap) &&
-            !shouldDisplayReconnectButton(installedSnap)
-          }
-        />
-        <Notice>
-          <p>
-            Please note that the <b>snap.manifest.json</b> and{' '}
-            <b>package.json</b> must be located in the server root directory and
-            the bundle must be hosted at the location specified by the location
-            field.
-          </p>
-        </Notice>
       </CardContainer>
+
+      {installedSnap && provider ? (
+        <>
+          <ToolbarRow>
+            <div>
+              {account ? (
+                <AccountBadge title={account}>
+                  Wallet: {shorten(account)}
+                </AccountBadge>
+              ) : (
+                <button
+                  onClick={() => {
+                    connectAccount().catch(() => undefined);
+                  }}
+                >
+                  Connect wallet account
+                </button>
+              )}
+            </div>
+            <div>
+              Environment:{' '}
+              <EnvSelect
+                value={capabilities?.environment ?? 'production'}
+                onChange={(event) => {
+                  switchEnvironment(event.target.value).catch(() => undefined);
+                }}
+              >
+                {ENVIRONMENTS.map((env) => (
+                  <option key={env} value={env}>
+                    {env}
+                  </option>
+                ))}
+              </EnvSelect>
+            </div>
+          </ToolbarRow>
+
+          {account && capabilities ? (
+            <>
+              <CashoutPanel
+                provider={provider}
+                account={account}
+                capabilities={capabilities}
+                onCompleted={() => setRefreshKey((key) => key + 1)}
+              />
+              <OrdersPanel
+                provider={provider}
+                account={account}
+                refreshKey={refreshKey}
+              />
+            </>
+          ) : null}
+        </>
+      ) : null}
     </Container>
   );
 };
