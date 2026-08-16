@@ -1,5 +1,7 @@
 export * from './Buttons';
 export * from './Card';
+export * from './CashoutPanel';
+export * from './OrdersPanel';
 export * from './Footer';
 export * from './Header';
 export * from './MetaMask';
