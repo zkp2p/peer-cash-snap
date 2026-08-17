@@ -132,16 +132,19 @@ export const ReconnectButton = (
   );
 };
 
+/**
+ * The header carries identity and connection status, not a call to action.
+ * Until the snap is installed the hero owns the single primary action, so the
+ * header stays empty rather than repeating it.
+ *
+ * @returns The header's right-hand control, or null before install.
+ */
 export const HeaderButtons = () => {
   const requestSnap = useRequestSnap();
-  const { isFlask, installedSnap } = useMetaMask();
-
-  if (!isFlask && !installedSnap) {
-    return <InstallFlaskButton />;
-  }
+  const { installedSnap } = useMetaMask();
 
   if (!installedSnap) {
-    return <ConnectButton onClick={requestSnap} />;
+    return null;
   }
 
   if (shouldDisplayReconnectButton(installedSnap)) {
