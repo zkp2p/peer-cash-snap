@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"></head>
+<body><div class="frame" style="flex-direction:row; gap:44px; align-items:center">
+
+  <div style="flex:1.02; display:flex; flex-direction:column">
+    <div class="brand">
+      <img class="mark" src="icon.svg" alt="">
+      <span class="name">Peer Cash</span>
+    </div>
+
+    <h1 style="font-size:40px; margin-top:26px">You approve<br>every step.</h1>
+
+    <p class="lede" style="font-size:16px; margin-top:16px; max-width:34ch">
+      The snap reviews the request and returns unsigned transactions. It holds
+      no keys and never signs. MetaMask still asks you to confirm each one.
+    </p>
+
+    <div style="margin-top:24px; display:flex; flex-direction:column; gap:11px">
+      <div style="display:flex; gap:11px; align-items:flex-start">
+        <span class="mono" style="color:#A78BFF; font-size:12.5px; font-weight:700; padding-top:1px">1</span>
+        <span class="note" style="color:#C3C8CE">The snap shows amount, rail, payee and a live estimate</span>
+      </div>
+      <div style="display:flex; gap:11px; align-items:flex-start">
+        <span class="mono" style="color:#A78BFF; font-size:12.5px; font-weight:700; padding-top:1px">2</span>
+        <span class="note" style="color:#C3C8CE">MetaMask confirms every transaction in the plan</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="flex:1; padding:24px 26px; display:flex; flex-direction:column; gap:14px">
+    <div class="panel-h">Start a cash-out?</div>
+    <div class="note" style="color:#C3C8CE">
+      <strong style="color:#fff">peer-cash-snap.vercel.app</strong> wants to cash out
+      USDC on Base through Peer.
+    </div>
+
+    <div style="background:#1B1E21; border:1px solid #2F3336; border-radius:10px; padding:4px 14px">
+      <div class="row"><span class="k">Amount</span><span class="v mono">25 USDC</span></div>
+      <div class="row"><span class="k">revolut &rarr; EUR</span><span class="v mono">@peer-demo</span></div>
+      <div class="row"><span class="k">Estimated payout</span><span class="v mono" style="color:#A78BFF">&asymp; 21.55 EUR</span></div>
+    </div>
+
+    <div class="note">
+      Your USDC stays escrowed in the ZKP2P protocol until a buyer pays you on
+      the platform above and proves it. The final rate is the live oracle rate
+      when the order fills &mdash; the estimate is not a locked quote. You can
+      withdraw unmatched funds at any time.
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:2px">
+      <div style="flex:1; text-align:center; padding:10px; border-radius:999px; border:1px solid #3A3E43; font-size:14px; font-weight:600; color:#C3C8CE">Reject</div>
+      <div style="flex:1; text-align:center; padding:10px; border-radius:999px; background:#6F4CFF; font-size:14px; font-weight:650">Approve</div>
+    </div>
+  </div>
+
+</div></body></html>

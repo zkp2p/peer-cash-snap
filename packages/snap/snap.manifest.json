@@ -1,0 +1,44 @@
+{
+  "version": "0.1.0",
+  "description": "Cash out Base USDC to fiat at the live market rate with Peer.",
+  "proposedName": "Peer Cash",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zkp2p/peer-cash-snap.git"
+  },
+  "source": {
+    "shasum": "DTg/2rdRpVg/HkWQnVVUASu9ica3bxXB53UpYdPrBZ0=",
+    "location": {
+      "npm": {
+        "filePath": "dist/bundle.js",
+        "iconPath": "images/icon.svg",
+        "packageName": "@zkp2p/peer-cash-snap",
+        "registry": "https://registry.npmjs.org/"
+      }
+    }
+  },
+  "initialPermissions": {
+    "endowment:rpc": {
+      "dapps": true,
+      "snaps": false
+    },
+    "endowment:network-access": {},
+    "endowment:page-home": {},
+    "endowment:cronjob": {
+      "jobs": [
+        {
+          "expression": "*/5 * * * *",
+          "request": {
+            "method": "refreshOrders"
+          }
+        }
+      ]
+    },
+    "endowment:lifecycle-hooks": {},
+    "snap_dialog": {},
+    "snap_notify": {},
+    "snap_manageState": {}
+  },
+  "platformVersion": "10.3.0",
+  "manifestVersion": "0.1"
+}

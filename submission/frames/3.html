@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="base.css"></head>
+<body><div class="frame" style="flex-direction:row; gap:44px; align-items:center">
+
+  <div style="flex:1; display:flex; flex-direction:column">
+    <div class="brand">
+      <img class="mark" src="icon.svg" alt="">
+      <span class="name">Peer Cash</span>
+    </div>
+
+    <h1 style="font-size:40px; margin-top:26px">Track every<br>order in&nbsp;wallet.</h1>
+
+    <p class="lede" style="font-size:16px; margin-top:16px; max-width:33ch">
+      Live order state on the snap&rsquo;s home page, refreshed in the background
+      every five minutes.
+    </p>
+
+    <div style="margin-top:24px; display:flex; flex-direction:column; gap:10px">
+      <div class="note" style="color:#C3C8CE">&middot;&nbsp;&nbsp;Notified when a buyer matches</div>
+      <div class="note" style="color:#C3C8CE">&middot;&nbsp;&nbsp;Notified when the payout is delivered</div>
+      <div class="note" style="color:#C3C8CE">&middot;&nbsp;&nbsp;Notified when unmatched funds return</div>
+    </div>
+  </div>
+
+  <div style="flex:1.05; display:flex; flex-direction:column; gap:11px">
+
+    <div class="panel" style="padding:16px 18px; display:flex; flex-direction:column; gap:9px">
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <span class="mono" style="font-size:12.5px; color:#9AA0A6">0x777777&hellip;300ef_3939</span>
+        <span class="pill live">awaiting-buyer</span>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:9px">
+        <span class="mono" style="font-size:25px; font-weight:700">8</span>
+        <span class="muted" style="font-size:13px">USDC</span>
+        <span class="muted" style="font-size:13px; margin-left:6px">via revolut &rarr; USD</span>
+      </div>
+      <div class="note">Your 8 USDC cash-out is live and waiting for a buyer; you can withdraw it any time before a buyer commits.</div>
+    </div>
+
+    <div class="panel" style="padding:16px 18px; display:flex; flex-direction:column; gap:9px">
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <span class="mono" style="font-size:12.5px; color:#9AA0A6">0x777777&hellip;300ef_3940</span>
+        <span class="pill deliver">delivering</span>
+      </div>
+      <div style="display:flex; align-items:baseline; gap:9px">
+        <span class="mono" style="font-size:25px; font-weight:700">57.85</span>
+        <span class="muted" style="font-size:13px">USDC</span>
+        <span class="muted" style="font-size:13px; margin-left:6px">via revolut &rarr; EUR</span>
+      </div>
+      <div style="height:5px; border-radius:3px; background:#2F3336; overflow:hidden">
+        <div style="width:65.1%; height:100%; background:#7FD98F"></div>
+      </div>
+      <div class="note">37.658178 USDC of 57.85 USDC has been delivered; the rest is locked by an active buyer.</div>
+    </div>
+
+  </div>
+
+</div></body></html>
