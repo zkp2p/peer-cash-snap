@@ -10,6 +10,7 @@ import {
   Section,
   Text,
   type SnapComponent,
+  type SnapElement,
 } from '@metamask/snaps-sdk/jsx';
 import type { RuntimeEnv } from '@zkp2p/cash';
 
@@ -39,15 +40,7 @@ const legLabel = (platform: string, currencies: string[]): string =>
 
 type EnvironmentNoticeProps = { environment: RuntimeEnv };
 
-/**
- * Warning banner for non-production environments. Callers render it
- * conditionally; on production it should not be rendered at all.
- *
- * @param props - Component props.
- * @param props.environment - Active runtime environment.
- * @returns The banner.
- */
-export const EnvironmentNotice: SnapComponent<EnvironmentNoticeProps> = ({
+const EnvironmentNoticeBanner: SnapComponent<EnvironmentNoticeProps> = ({
   environment,
 }) => (
   <Banner title="Non-production environment" severity="warning">
@@ -56,6 +49,20 @@ export const EnvironmentNotice: SnapComponent<EnvironmentNoticeProps> = ({
     </Text>
   </Banner>
 );
+
+/**
+ * Warning banner for non-production environments; null on production. Owns
+ * the production check so every surface renders it unconditionally.
+ *
+ * @param environment - Active runtime environment.
+ * @returns The banner, or null on production.
+ */
+export const environmentNotice = (
+  environment: RuntimeEnv,
+): SnapElement<EnvironmentNoticeProps> | null =>
+  environment === 'production' ? null : (
+    <EnvironmentNoticeBanner environment={environment} />
+  );
 
 type CashoutConfirmationProps = {
   origin: string;
@@ -103,9 +110,7 @@ export const CashoutConfirmation: SnapComponent<CashoutConfirmationProps> = ({
         </Row>
       )}
     </Section>
-    {environment === 'production' ? null : (
-      <EnvironmentNotice environment={environment} />
-    )}
+    {environmentNotice(environment)}
     <Text>
       Your USDC stays escrowed in the ZKP2P protocol until a buyer pays you on
       the platform above and proves it. The final rate is the live oracle rate
@@ -164,9 +169,7 @@ export const WithdrawConfirmation: SnapComponent<WithdrawConfirmationProps> = ({
         <Text>{stateLine}</Text>
       </Row>
     </Section>
-    {environment === 'production' ? null : (
-      <EnvironmentNotice environment={environment} />
-    )}
+    {environmentNotice(environment)}
     <Text>
       Approving returns unsigned transactions to the site; MetaMask will ask you
       to confirm each one. A live buyer intent blocks a full close until it is
@@ -212,9 +215,7 @@ export const TopUpConfirmation: SnapComponent<TopUpConfirmationProps> = ({
         <Text>{stateLine}</Text>
       </Row>
     </Section>
-    {environment === 'production' ? null : (
-      <EnvironmentNotice environment={environment} />
-    )}
+    {environmentNotice(environment)}
     <Text>
       The added USDC is offered at the same live market rate to the same payout
       legs. Approving returns unsigned transactions to the site; MetaMask will
@@ -317,9 +318,7 @@ export const HomePanel: SnapComponent<HomePanelProps> = ({
   <Box>
     <Heading>Peer Cash</Heading>
     <Text>Cash out Base USDC to fiat at the live market rate.</Text>
-    {environment === 'production' ? null : (
-      <EnvironmentNotice environment={environment} />
-    )}
+    {environmentNotice(environment)}
     {views.length === 0 ? (
       <Box>
         <Text>

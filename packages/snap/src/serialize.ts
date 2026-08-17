@@ -29,15 +29,13 @@ export type CapabilitiesView = {
  * Convert live capabilities into a JSON-safe wire shape for the dapp.
  *
  * @param capabilities - Result of `cash.capabilities()`.
- * @param environment - Environment the capabilities were read for.
  * @returns The serializable view.
  */
 export function serializeCapabilities(
   capabilities: CashCapabilities,
-  environment: RuntimeEnv,
 ): CapabilitiesView {
   return {
-    environment,
+    environment: capabilities.environment,
     chainId: capabilities.chainId,
     token: capabilities.token,
     platforms: capabilities.platforms.map((platform) => ({
@@ -56,6 +54,18 @@ export function serializeCapabilities(
     pricing: capabilities.pricing,
   };
 }
+
+/**
+ * `cash_prepareCashout` echo payload the dapp passes back verbatim (minus
+ * `environment`) to `cash_finalizeCashout`. Named so the site can type its
+ * side of the round-trip against this exact shape.
+ */
+export type CashoutMeta = {
+  owner: string;
+  amountUsdc: string;
+  legs: { platform: string; currencies: string[] }[];
+  environment: RuntimeEnv;
+};
 
 /** JSON-safe order view consumed by the dapp and the home page. */
 export type OrderView = {
@@ -94,6 +104,12 @@ export type OrderView = {
 
 /**
  * Convert a live `CashOrder` into a JSON-safe view.
+ *
+ * This is a deliberate allowlist, not a generic codec: the SDK's
+ * `orderToJson` carries fill/payee details the snap must not expose, so new
+ * `CashOrder` fields stay out of the wire shape until added here explicitly.
+ * (The conditional spreads are the type-safe optional-field idiom under
+ * `exactOptionalPropertyTypes`.)
  *
  * @param order - Live order from `order()`/`orders()`.
  * @param tracked - Snap-tracked metadata for the same deposit, if any.

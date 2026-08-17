@@ -2,21 +2,11 @@ import type { MetaMaskInpageProvider } from '@metamask/providers';
 import { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+import { ErrorText, Panel, SmallInput, Status } from './panelStyles';
+import { useFlow } from '../hooks';
 import type { OrderView, WirePlan } from '../types/cash';
-import { invokeCash, shorten } from '../utils/cash';
+import { errorMessage, invokeCash, shorten } from '../utils/cash';
 import { ensureBaseChain, executePlan } from '../utils/chain';
-
-const Panel = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  background-color: ${({ theme }) => theme.colors.card?.default};
-  margin-top: 2.4rem;
-  padding: 2.4rem;
-  border: 1px solid ${({ theme }) => theme.colors.border?.default};
-  border-radius: ${({ theme }) => theme.radii.default};
-  box-shadow: ${({ theme }) => theme.shadows.default};
-`;
 
 const TitleRow = styled.div`
   display: flex;
@@ -81,26 +71,8 @@ const ButtonRow = styled.div`
   align-items: center;
 `;
 
-const SmallInput = styled.input`
-  font-size: ${({ theme }) => theme.fontSizes.small};
-  padding: 0.6rem;
+const TopUpInput = styled(SmallInput)`
   width: 10rem;
-  border: 1px solid ${({ theme }) => theme.colors.border?.default};
-  border-radius: ${({ theme }) => theme.radii.default};
-  background: ${({ theme }) => theme.colors.background?.default};
-  color: ${({ theme }) => theme.colors.text?.default};
-`;
-
-const ErrorText = styled.p`
-  color: ${({ theme }) => theme.colors.error?.default};
-  font-size: ${({ theme }) => theme.fontSizes.small};
-  margin: 0.8rem 0 0 0;
-  word-break: break-word;
-`;
-
-const Status = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.small};
-  margin: 0.8rem 0 0 0;
 `;
 
 const Empty = styled.p`
@@ -132,9 +104,8 @@ export const OrdersPanel = ({
 }: OrdersPanelProps) => {
   const [orders, setOrders] = useState<OrderView[]>([]);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [topUpAmounts, setTopUpAmounts] = useState<Record<string, string>>({});
+  const { busy, status, error, setError, run } = useFlow();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -147,15 +118,11 @@ export const OrdersPanel = ({
       );
       setOrders(result.orders);
     } catch (loadError) {
-      setError(
-        loadError instanceof Error
-          ? loadError.message
-          : 'Failed to load orders',
-      );
+      setError(errorMessage(loadError, 'Failed to load orders'));
     } finally {
       setLoading(false);
     }
-  }, [provider, account]);
+  }, [provider, account, setError]);
 
   useEffect(() => {
     load().catch(() => undefined);
@@ -164,23 +131,15 @@ export const OrdersPanel = ({
   const runPlan = async (
     label: string,
     prepare: () => Promise<{ plan: WirePlan }>,
-  ) => {
-    setError(null);
-    try {
-      setStatus(`Switching MetaMask to Base…`);
+  ) =>
+    run(`The ${label} failed.`, async (report) => {
+      report(`Switching MetaMask to Base…`);
       await ensureBaseChain(provider);
-      setStatus(`Review the ${label} in the Peer Cash snap…`);
+      report(`Review the ${label} in the Peer Cash snap…`);
       const { plan } = await prepare();
-      await executePlan(provider, account, plan.txs, plan.steps, setStatus);
-      setStatus(null);
+      await executePlan(provider, account, plan.txs, plan.steps, report);
       await load();
-    } catch (planError) {
-      setStatus(null);
-      setError(
-        planError instanceof Error ? planError.message : `${label} failed`,
-      );
-    }
-  };
+    });
 
   const withdraw = async (depositId: string) =>
     runPlan('withdrawal', async () =>
@@ -202,18 +161,11 @@ export const OrdersPanel = ({
     );
   };
 
-  const untrack = async (depositId: string) => {
-    try {
+  const untrack = async (depositId: string) =>
+    run('Failed to remove the order.', async () => {
       await invokeCash(provider, 'cash_untrackOrder', { depositId });
       await load();
-    } catch (untrackError) {
-      setError(
-        untrackError instanceof Error
-          ? untrackError.message
-          : 'Failed to remove order',
-      );
-    }
-  };
+    });
 
   return (
     <Panel>
@@ -260,6 +212,7 @@ export const OrdersPanel = ({
             <ButtonRow>
               {order.nextActions.includes('withdraw') ? (
                 <button
+                  disabled={busy}
                   onClick={() => {
                     withdraw(order.depositId).catch(() => undefined);
                   }}
@@ -269,7 +222,7 @@ export const OrdersPanel = ({
               ) : null}
               {order.isInFlight ? (
                 <>
-                  <SmallInput
+                  <TopUpInput
                     inputMode="decimal"
                     placeholder="USDC"
                     value={topUpAmounts[order.depositId] ?? ''}
@@ -281,7 +234,7 @@ export const OrdersPanel = ({
                     }
                   />
                   <button
-                    disabled={!topUpAmounts[order.depositId]}
+                    disabled={busy || !topUpAmounts[order.depositId]}
                     onClick={() => {
                       topUp(order.depositId).catch(() => undefined);
                     }}
@@ -292,6 +245,7 @@ export const OrdersPanel = ({
               ) : null}
               {order.tracked && !order.isInFlight ? (
                 <button
+                  disabled={busy}
                   onClick={() => {
                     untrack(order.depositId).catch(() => undefined);
                   }}

@@ -7,6 +7,9 @@ export const SUPPORTED_ENVIRONMENTS = [
   'staging',
 ] as const satisfies readonly RuntimeEnv[];
 
+/** One environment this snap can target. */
+export type SupportedEnvironment = (typeof SUPPORTED_ENVIRONMENTS)[number];
+
 /**
  * Payout rails whose deposits require an atomically configured access policy
  * (Plus/Pro/Peer Makers/Peer Pay) that only first-party Peer hosts can
