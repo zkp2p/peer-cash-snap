@@ -51,3 +51,14 @@ export function formatEta(seconds: number): string {
 export function shorten(value: string): string {
   return value.length > 14 ? `${value.slice(0, 8)}…${value.slice(-4)}` : value;
 }
+
+/**
+ * Coerce a thrown value into a display message.
+ *
+ * @param error - The caught value.
+ * @param fallback - Text to use when the value carries no message.
+ * @returns The message to render.
+ */
+export function errorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback;
+}

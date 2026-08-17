@@ -1,27 +1,22 @@
+import type { CashoutMeta, OrderView } from '../../../snap/src/serialize';
+
 /**
- * Wire types for the Peer Cash snap's JSON-RPC surface. These mirror the
- * JSON-safe shapes the snap returns (bigints travel as decimal strings);
- * the site deliberately does not import `@zkp2p/cash` - the snap is the
- * single SDK host.
+ * Wire types for the Peer Cash snap's JSON-RPC surface.
+ *
+ * The view and meta shapes are type-only imports from the snap workspace -
+ * one source of truth, erased at build time, so the site still never bundles
+ * snap code or `@zkp2p/cash` (the snap is the single SDK host). Shapes the
+ * snap forwards verbatim from the SDK (estimates, plans, receipts) are
+ * mirrored here by hand, with bigints travelling as decimal strings.
  */
 
-export type PlatformView = {
-  platform: string;
-  currencies: string[];
-  payeeHint: string;
-  requiresIdentityAttestation: boolean;
-  restricted: boolean;
-};
-
-export type CapabilitiesView = {
-  environment: 'production' | 'preproduction' | 'staging';
-  chainId: number;
-  token: { address: string; symbol: string; decimals: number };
-  platforms: PlatformView[];
-  currencies: string[];
-  amount: { min: string; recommendedMin: string; max: null };
-  pricing: { kind: string; spreadBps: number };
-};
+export type { SupportedEnvironment } from '../../../snap/src/constants';
+export type {
+  CapabilitiesView,
+  CashoutMeta,
+  OrderView,
+  PlatformView,
+} from '../../../snap/src/serialize';
 
 export type EstimateView = {
   kind: string;
@@ -57,39 +52,7 @@ export type PrepareCashoutResult = {
     register: { hashedOnchainIds: string[] };
     accessPolicyRequired: boolean;
   };
-  meta: {
-    owner: string;
-    amountUsdc: string;
-    legs: { platform: string; currencies: string[] }[];
-    environment: string;
-  };
-};
-
-export type OrderView = {
-  depositId: string;
-  state: string;
-  isInFlight: boolean;
-  nextActions: string[];
-  explain: string;
-  totalAmount: string;
-  filledAmount: string;
-  pendingAmount: string;
-  returnedAmount: string;
-  totalUsdc: string;
-  filledUsdc: string;
-  pendingUsdc: string;
-  returnedUsdc: string;
-  payouts?: { platform: string; currencies: string[] }[];
-  intentCount?: number;
-  successRateBps?: number;
-  withdrawn?: boolean;
-  matchedAt?: number;
-  deliveredAt?: number;
-  updatedAt?: number;
-  tracked: boolean;
-  createdAt?: number;
-  creationTxHash?: string;
-  stale?: boolean;
+  meta: CashoutMeta;
 };
 
 export type FinalizeCashoutResult = {

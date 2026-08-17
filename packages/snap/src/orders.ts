@@ -1,3 +1,5 @@
+import type { CashOrder } from '@zkp2p/cash';
+
 import { getCashClient } from './cash';
 import { STATE_NOTIFICATIONS } from './constants';
 import type { OrderView } from './serialize';
@@ -66,6 +68,23 @@ export async function refreshTrackedOrders(options: {
     patches.set(depositId, { ...(patches.get(depositId) ?? {}), ...patch });
   };
 
+  // Start every in-flight live read up front so the network waits overlap;
+  // home-page latency stays flat as tracked orders grow. allSettled attaches
+  // rejection handlers immediately, and failures degrade per-order below.
+  const inFlight = tracked.filter((order) => order.inFlight);
+  const liveReads = new Map<string, PromiseSettledResult<CashOrder>>();
+  const settled = await Promise.allSettled(
+    inFlight.map(async (order) =>
+      getCashClient(order.environment).order(order.depositId),
+    ),
+  );
+  inFlight.forEach((order, index) => {
+    const result = settled[index];
+    if (result) {
+      liveReads.set(order.depositId, result);
+    }
+  });
+
   for (const trackedOrder of tracked) {
     // Deliver a notification owed from an earlier notify:false observation.
     if (
@@ -84,40 +103,40 @@ export async function refreshTrackedOrders(options: {
       continue;
     }
 
-    try {
-      const order = await getCashClient(trackedOrder.environment).order(
-        trackedOrder.depositId,
-      );
-      views.push(serializeOrder(order, trackedOrder));
-
-      const patch: TrackedPatch = {};
-      if (order.state !== trackedOrder.lastState) {
-        patch.lastState = order.state;
-      }
-      if (order.isInFlight !== trackedOrder.inFlight) {
-        patch.inFlight = order.isInFlight;
-      }
-      const liveAmount = order.totalAmount.toString();
-      if (liveAmount !== trackedOrder.amount) {
-        // Keeps cached views honest after on-chain top-ups.
-        patch.amount = liveAmount;
-      }
-      if (
-        patch.lastState !== undefined &&
-        options.notify &&
-        trackedOrder.lastNotifiedState !== order.state
-      ) {
-        await notifyState(order.state);
-        patch.lastNotifiedState = order.state;
-      }
-
-      if (Object.keys(patch).length > 0) {
-        addPatch(trackedOrder.depositId, patch);
-        Object.assign(trackedOrder, patch);
-      }
-    } catch {
+    const liveRead = liveReads.get(trackedOrder.depositId);
+    if (liveRead?.status !== 'fulfilled') {
       // Live read failed (indexer lag, network) - fall back to cached view.
       views.push(viewFromTracked(trackedOrder));
+      continue;
+    }
+
+    const order = liveRead.value;
+    views.push(serializeOrder(order, trackedOrder));
+
+    const patch: TrackedPatch = {};
+    if (order.state !== trackedOrder.lastState) {
+      patch.lastState = order.state;
+    }
+    if (order.isInFlight !== trackedOrder.inFlight) {
+      patch.inFlight = order.isInFlight;
+    }
+    const liveAmount = order.totalAmount.toString();
+    if (liveAmount !== trackedOrder.amount) {
+      // Keeps cached views honest after on-chain top-ups.
+      patch.amount = liveAmount;
+    }
+    if (
+      patch.lastState !== undefined &&
+      options.notify &&
+      trackedOrder.lastNotifiedState !== order.state
+    ) {
+      await notifyState(order.state);
+      patch.lastNotifiedState = order.state;
+    }
+
+    if (Object.keys(patch).length > 0) {
+      addPatch(trackedOrder.depositId, patch);
+      Object.assign(trackedOrder, patch);
     }
   }
 

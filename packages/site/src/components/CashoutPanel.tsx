@@ -2,6 +2,8 @@ import type { MetaMaskInpageProvider } from '@metamask/providers';
 import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
+import { ErrorText, Input, Panel, Select, Status } from './panelStyles';
+import { useFlow } from '../hooks';
 import type {
   CapabilitiesView,
   EstimateView,
@@ -14,18 +16,6 @@ import {
   executePlan,
   toFinalizeReceipt,
 } from '../utils/chain';
-
-const Panel = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  background-color: ${({ theme }) => theme.colors.card?.default};
-  margin-top: 2.4rem;
-  padding: 2.4rem;
-  border: 1px solid ${({ theme }) => theme.colors.border?.default};
-  border-radius: ${({ theme }) => theme.radii.default};
-  box-shadow: ${({ theme }) => theme.shadows.default};
-`;
 
 const Title = styled.h2`
   font-size: ${({ theme }) => theme.fontSizes.large};
@@ -50,24 +40,6 @@ const Field = styled.label`
   min-width: 16rem;
 `;
 
-const Input = styled.input`
-  font-size: ${({ theme }) => theme.fontSizes.text};
-  padding: 1rem;
-  border: 1px solid ${({ theme }) => theme.colors.border?.default};
-  border-radius: ${({ theme }) => theme.radii.default};
-  background: ${({ theme }) => theme.colors.background?.default};
-  color: ${({ theme }) => theme.colors.text?.default};
-`;
-
-const Select = styled.select`
-  font-size: ${({ theme }) => theme.fontSizes.text};
-  padding: 1rem;
-  border: 1px solid ${({ theme }) => theme.colors.border?.default};
-  border-radius: ${({ theme }) => theme.radii.default};
-  background: ${({ theme }) => theme.colors.background?.default};
-  color: ${({ theme }) => theme.colors.text?.default};
-`;
-
 const EstimateLine = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.text};
   margin: 0.4rem 0 1.6rem 0;
@@ -80,18 +52,6 @@ const Hint = styled.span`
 
 const ActionButton = styled.button`
   align-self: flex-start;
-`;
-
-const Status = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.small};
-  margin: 1.2rem 0 0 0;
-`;
-
-const ErrorText = styled.p`
-  color: ${({ theme }) => theme.colors.error?.default};
-  font-size: ${({ theme }) => theme.fontSizes.small};
-  margin: 1.2rem 0 0 0;
-  word-break: break-word;
 `;
 
 const SuccessText = styled.p`
@@ -135,10 +95,8 @@ export const CashoutPanel = ({
   const [payee, setPayee] = useState('');
   const [amount, setAmount] = useState('10');
   const [estimate, setEstimate] = useState<EstimateView | null>(null);
-  const [status, setStatus] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const { busy, status, error, run } = useFlow();
 
   const selectPlatform = (nextPlatform: string) => {
     setPlatform(nextPlatform);
@@ -166,14 +124,12 @@ export const CashoutPanel = ({
   }, [provider, platform, currency, amount]);
 
   const startCashout = async () => {
-    setBusy(true);
-    setError(null);
     setDone(null);
-    try {
-      setStatus('Switching MetaMask to Base…');
+    const finalized = await run('The cash-out flow failed.', async (report) => {
+      report('Switching MetaMask to Base…');
       await ensureBaseChain(provider);
 
-      setStatus('Review the cash-out in the Peer Cash snap…');
+      report('Review the cash-out in the Peer Cash snap…');
       const prepared = await invokeCash<PrepareCashoutResult>(
         provider,
         'cash_prepareCashout',
@@ -189,7 +145,7 @@ export const CashoutPanel = ({
         account,
         prepared.plan.txs,
         prepared.plan.steps,
-        setStatus,
+        report,
       );
 
       const createDeposit = executed.find(
@@ -201,8 +157,8 @@ export const CashoutPanel = ({
         );
       }
 
-      setStatus('Finalizing with the snap…');
-      const finalized = await invokeCash<FinalizeCashoutResult>(
+      report('Finalizing with the snap…');
+      return invokeCash<FinalizeCashoutResult>(
         provider,
         'cash_finalizeCashout',
         {
@@ -212,19 +168,11 @@ export const CashoutPanel = ({
           receipt: toFinalizeReceipt(createDeposit.receipt),
         },
       );
+    });
 
-      setStatus(null);
+    if (finalized) {
       setDone(finalized.result.depositId);
       onCompleted(finalized.result.depositId);
-    } catch (flowError) {
-      setStatus(null);
-      setError(
-        flowError instanceof Error
-          ? flowError.message
-          : 'The cash-out flow failed.',
-      );
-    } finally {
-      setBusy(false);
     }
   };
 

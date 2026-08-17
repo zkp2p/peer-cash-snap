@@ -9,9 +9,10 @@ import {
   ReconnectButton,
   Card,
 } from '../components';
+import { SmallSelect } from '../components/panelStyles';
 import { defaultSnapOrigin } from '../config';
 import { useMetaMask, useMetaMaskContext, useRequestSnap } from '../hooks';
-import type { CapabilitiesView } from '../types/cash';
+import type { CapabilitiesView, SupportedEnvironment } from '../types/cash';
 import { isLocalSnap, shouldDisplayReconnectButton } from '../utils';
 import { invokeCash, shorten } from '../utils/cash';
 
@@ -99,16 +100,13 @@ const AccountBadge = styled.code`
   font-size: ${({ theme }) => theme.fontSizes.small};
 `;
 
-const EnvSelect = styled.select`
-  font-size: ${({ theme }) => theme.fontSizes.small};
-  padding: 0.6rem;
-  border: 1px solid ${({ theme }) => theme.colors.border?.default};
-  border-radius: ${({ theme }) => theme.radii.default};
-  background: ${({ theme }) => theme.colors.background?.default};
-  color: ${({ theme }) => theme.colors.text?.default};
-`;
-
-const ENVIRONMENTS = ['production', 'preproduction', 'staging'] as const;
+// Typed against the snap's wire contract so a renamed environment fails to
+// compile here instead of silently desyncing the dropdown.
+const ENVIRONMENTS: readonly SupportedEnvironment[] = [
+  'production',
+  'preproduction',
+  'staging',
+];
 
 const Index = () => {
   const { error, provider, setError } = useMetaMaskContext();
@@ -282,7 +280,7 @@ const Index = () => {
             </div>
             <div>
               Environment:{' '}
-              <EnvSelect
+              <SmallSelect
                 value={capabilities?.environment ?? 'production'}
                 onChange={(event) => {
                   switchEnvironment(event.target.value).catch(() => undefined);
@@ -293,7 +291,7 @@ const Index = () => {
                     {env}
                   </option>
                 ))}
-              </EnvSelect>
+              </SmallSelect>
             </div>
           </ToolbarRow>
 

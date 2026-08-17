@@ -25,7 +25,7 @@ import {
   SUPPORTED_ENVIRONMENTS,
 } from './constants';
 import { refreshTrackedOrders } from './orders';
-import type { OrderView } from './serialize';
+import type { CashoutMeta, OrderView } from './serialize';
 import {
   serializeCapabilities,
   serializeOrder,
@@ -50,11 +50,16 @@ const amountSchema = z
   .max(32)
   .describe('Decimal USDC amount, e.g. "100" or "25.50"');
 
+const platformField = z.string().min(1).max(64);
+const currencyField = z.string().min(1).max(16);
+const currenciesField = z.array(currencyField).min(1).max(16);
+const depositIdField = z.string().min(1).max(256);
+
 const legSchema = z
   .object({
-    platform: z.string().min(1).max(64),
-    currency: z.string().min(1).max(16).optional(),
-    currencies: z.array(z.string().min(1).max(16)).min(1).max(16).optional(),
+    platform: platformField,
+    currency: currencyField.optional(),
+    currencies: currenciesField.optional(),
     payee: z.string().min(1).max(256),
   })
   .refine(
@@ -78,12 +83,7 @@ const finalizeCashoutSchema = z.object({
   owner: addressSchema,
   amountUsdc: amountSchema,
   legs: z
-    .array(
-      z.object({
-        platform: z.string().min(1).max(64),
-        currencies: z.array(z.string().min(1).max(16)).min(1).max(16),
-      }),
-    )
+    .array(z.object({ platform: platformField, currencies: currenciesField }))
     .min(1)
     .max(8),
   receipt: z.object({
@@ -95,24 +95,22 @@ const finalizeCashoutSchema = z.object({
 
 const estimateSchema = z.object({
   amountUsdc: amountSchema,
-  platform: z.string().min(1).max(64),
-  currency: z.string().min(1).max(16),
+  platform: platformField,
+  currency: currencyField,
 });
 
-const depositIdSchema = z.object({ depositId: z.string().min(1).max(256) });
+const depositIdSchema = z.object({ depositId: depositIdField });
 
 const getOrdersSchema = z.object({
   owner: addressSchema,
   inFlight: z.boolean().optional(),
 });
 
-const prepareWithdrawSchema = z.object({
-  depositId: z.string().min(1).max(256),
+const prepareWithdrawSchema = depositIdSchema.extend({
   amountUsdc: amountSchema.optional(),
 });
 
-const prepareTopUpSchema = z.object({
-  depositId: z.string().min(1).max(256),
+const prepareTopUpSchema = depositIdSchema.extend({
   amountUsdc: amountSchema,
 });
 
@@ -207,7 +205,9 @@ function normalizeLegs(
 }
 
 /**
- * Build the SDK `receive` value from normalized legs.
+ * Build the SDK `receive` value from normalized legs. A one-element
+ * `currencies` tuple is a valid `CashMultiCurrencyLeg`, so every leg maps to
+ * the same shape.
  *
  * @param legs - Normalized legs.
  * @returns The SDK receive legs.
@@ -215,28 +215,13 @@ function normalizeLegs(
 function toReceiveLegs(
   legs: NormalizedLeg[],
 ): [CashReceiveLeg, ...CashReceiveLeg[]] {
-  const receive = legs.map((leg): CashReceiveLeg => {
-    const [firstCurrency, ...restCurrencies] = leg.currencies;
-    if (!firstCurrency) {
-      throw new SnapError('Each leg needs at least one currency');
-    }
-    if (restCurrencies.length === 0) {
-      return {
-        platform: leg.platform,
-        currency: firstCurrency as CurrencyType,
-        payee: leg.payee,
-      };
-    }
-    return {
+  return legs.map(
+    (leg): CashReceiveLeg => ({
       platform: leg.platform,
-      currencies: [
-        firstCurrency as CurrencyType,
-        ...(restCurrencies as CurrencyType[]),
-      ],
+      currencies: leg.currencies as [CurrencyType, ...CurrencyType[]],
       payee: leg.payee,
-    };
-  });
-  return receive as [CashReceiveLeg, ...CashReceiveLeg[]];
+    }),
+  ) as [CashReceiveLeg, ...CashReceiveLeg[]];
 }
 
 /**
@@ -255,6 +240,72 @@ function assertNoRestrictedLegs(legs: NormalizedLeg[]): void {
         .join(', ')} are not supported in this snap. ${RESTRICTED_REMEDIATION}`,
     );
   }
+}
+
+/**
+ * Race a promise against a deadline, resolving with a fallback on timeout or
+ * rejection. Used for best-effort display data so a slow indexer or oracle
+ * cannot delay a confirmation dialog indefinitely.
+ *
+ * @param promise - The best-effort read.
+ * @param ms - Deadline in milliseconds.
+ * @param fallback - Value to resolve with on timeout or failure.
+ * @returns The read result, or the fallback.
+ */
+async function withDeadline<Value>(
+  promise: Promise<Value>,
+  ms: number,
+  fallback: Value,
+): Promise<Value> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<Value>((resolve) => {
+    timer = setTimeout(() => resolve(fallback), ms);
+  });
+  try {
+    return await Promise.race([promise, deadline]);
+  } catch {
+    return fallback;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Best-effort one-line live status for a deposit, for confirmation dialogs.
+ * The post-confirmation `prepare*` call surfaces real errors, so failures and
+ * slow reads degrade to a placeholder instead of delaying the dialog.
+ *
+ * @param client - The cash client to read with.
+ * @param depositId - The composite deposit id.
+ * @returns The status line.
+ */
+async function orderStateLine(
+  client: ReturnType<typeof getCashClient>,
+  depositId: string,
+): Promise<string> {
+  return withDeadline(
+    client.order(depositId).then((order) => order.explain()),
+    1_500,
+    'Live order state unavailable.',
+  );
+}
+
+/**
+ * Serialize an unsigned transaction plan to the wire shape the dapp submits.
+ *
+ * @param plan - The prepared withdraw/top-up plan.
+ * @param plan.txs - The unsigned transactions.
+ * @param plan.steps - The matching step descriptions.
+ * @returns The JSON-safe plan.
+ */
+function planToJson(plan: {
+  txs: Parameters<typeof preparedTxToJson>[0][];
+  steps: Parameters<typeof preparedStepToJson>[0][];
+}): Json {
+  return {
+    txs: plan.txs.map(preparedTxToJson),
+    steps: plan.steps.map(preparedStepToJson),
+  } as unknown as Json;
 }
 
 /**
@@ -304,10 +355,7 @@ export async function handleRpcRequest(
         const state = await getSnapState();
         const capabilities = getCashClient(state.environment).capabilities();
         return {
-          capabilities: serializeCapabilities(
-            capabilities,
-            state.environment,
-          ) as unknown as Json,
+          capabilities: serializeCapabilities(capabilities) as unknown as Json,
         };
       }
 
@@ -356,23 +404,28 @@ export async function handleRpcRequest(
         const state = await getSnapState();
         const client = getCashClient(state.environment);
 
-        // Best-effort estimate for the confirmation dialog only.
+        // Best-effort estimate for the confirmation dialog only; the dialog
+        // renders without one rather than waiting on a slow oracle.
         let estimateText: string | null = null;
         const firstLeg = legs[0];
         const firstCurrency = firstLeg?.currencies[0];
         if (firstLeg && firstCurrency) {
-          try {
-            const estimate = await client.estimate({
-              amount,
-              platform: firstLeg.platform,
-              currency: firstCurrency as CurrencyType,
-            });
-            estimateText = `≈ ${estimate.receiveAmount.toFixed(2)} ${
-              estimate.currency
-            }${estimate.stale ? ' (stale oracle rate)' : ''}`;
-          } catch {
-            estimateText = null;
-          }
+          estimateText = await withDeadline(
+            client
+              .estimate({
+                amount,
+                platform: firstLeg.platform,
+                currency: firstCurrency as CurrencyType,
+              })
+              .then(
+                (estimate) =>
+                  `≈ ${estimate.receiveAmount.toFixed(2)} ${estimate.currency}${
+                    estimate.stale ? ' (stale oracle rate)' : ''
+                  }`,
+              ),
+            2_500,
+            null,
+          );
         }
 
         await confirmOrThrow(
@@ -394,17 +447,18 @@ export async function handleRpcRequest(
           throw new SnapError(RESTRICTED_REMEDIATION);
         }
 
+        const meta: CashoutMeta = {
+          owner: params.owner,
+          amountUsdc: params.amountUsdc,
+          legs: legs.map((leg) => ({
+            platform: leg.platform,
+            currencies: leg.currencies,
+          })),
+          environment: state.environment,
+        };
         return {
           plan: prepareResultToJson(plan) as unknown as Json,
-          meta: {
-            owner: params.owner,
-            amountUsdc: params.amountUsdc,
-            legs: legs.map((leg) => ({
-              platform: leg.platform,
-              currencies: leg.currencies,
-            })) as unknown as Json,
-            environment: state.environment,
-          },
+          meta: meta as unknown as Json,
         };
       }
 
@@ -509,14 +563,7 @@ export async function handleRpcRequest(
         const params = parseParams(prepareWithdrawSchema, request.params);
         const state = await getSnapState();
         const client = getCashClient(state.environment);
-
-        let stateLine = 'Live order state unavailable.';
-        try {
-          const order = await client.order(params.depositId);
-          stateLine = order.explain();
-        } catch {
-          // The withdraw preflight below will surface a real error if any.
-        }
+        const stateLine = await orderStateLine(client, params.depositId);
 
         const amount =
           params.amountUsdc === undefined
@@ -537,12 +584,7 @@ export async function handleRpcRequest(
           params.depositId,
           amount === undefined ? {} : { amount },
         );
-        return {
-          plan: {
-            txs: plan.txs.map(preparedTxToJson) as unknown as Json,
-            steps: plan.steps.map(preparedStepToJson) as unknown as Json,
-          },
-        };
+        return { plan: planToJson(plan) };
       }
 
       case 'cash_prepareTopUp': {
@@ -550,14 +592,7 @@ export async function handleRpcRequest(
         const amount = parseUsdcAmount(params.amountUsdc);
         const state = await getSnapState();
         const client = getCashClient(state.environment);
-
-        let stateLine = 'Live order state unavailable.';
-        try {
-          const order = await client.order(params.depositId);
-          stateLine = order.explain();
-        } catch {
-          // The top-up preflight below will surface a real error if any.
-        }
+        const stateLine = await orderStateLine(client, params.depositId);
 
         await confirmOrThrow(
           <TopUpConfirmation
@@ -570,12 +605,7 @@ export async function handleRpcRequest(
         );
 
         const plan = await client.prepareTopUp(params.depositId, amount);
-        return {
-          plan: {
-            txs: plan.txs.map(preparedTxToJson) as unknown as Json,
-            steps: plan.steps.map(preparedStepToJson) as unknown as Json,
-          },
-        };
+        return { plan: planToJson(plan) };
       }
 
       case 'cash_untrackOrder': {
