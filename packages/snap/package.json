@@ -1,6 +1,6 @@
 {
   "name": "@zkp2p/peer-cash-snap",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MetaMask Snap for Peer Cash: cash out Base USDC to fiat at the live market rate.",
   "keywords": [
     "metamask-snap",

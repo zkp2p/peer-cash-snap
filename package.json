@@ -1,6 +1,6 @@
 {
   "name": "peer-cash-snap",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "MetaMask Snap + companion dapp for Peer Cash: cash out Base USDC to fiat at the live market rate.",
   "homepage": "https://github.com/zkp2p/peer-cash-snap#readme",
