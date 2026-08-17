@@ -26,11 +26,8 @@ and free of the banned words (MetaMask, meta, mask, snap).
 Peer
 ```
 
-> Inconsistency to settle first: `packages/snap/package.json` declares
-> `"author": "ZKP2P"`, while the sibling package `@zkp2p/cash` publishes
-> `"author": "Peer (https://peer.xyz)"`. Reviewers do cross-check npm metadata
-> against the form. Pick one — "Peer" matches the live brand, peer.xyz, and the
-> snap's own `proposedName` — and make the package agree before submitting.
+Settled: `author` is now `Peer (https://peer.xyz)` in the root, snap and site
+packages, matching `@zkp2p/cash` and the brand name on this form.
 
 **4. Your company or brand website** _(required)_
 
@@ -73,7 +70,7 @@ Venmo, Cash App, and PayPal are not offered here. Those rails need an access pol
 https://github.com/zkp2p/peer-cash-snap
 ```
 
-**NEEDS ANDREW** — the repo must be public before this is a valid answer.
+Confirmed: the repository is public.
 
 **9. Public npm package URL** _(required)_
 
@@ -81,7 +78,7 @@ https://github.com/zkp2p/peer-cash-snap
 https://www.npmjs.com/package/@zkp2p/peer-cash-snap
 ```
 
-**NEEDS ANDREW** — blocked on package-creation rights in the `@zkp2p` npm org.
+Confirmed: `@zkp2p/peer-cash-snap@0.1.0` is published and live on npm.
 
 **10. Snap version to be allowlisted** _(required)_
 
@@ -125,7 +122,7 @@ https://support.peer.xyz
 support@peer.xyz
 ```
 
-**NEEDS ANDREW.** `support@peer.xyz` is the canonical public support address —
+Confirmed by Andrew. `support@peer.xyz` is the canonical public support address —
 it is the single source of truth in `clients/web/src/helpers/supportEmail.ts`,
 pinned by a unit test, and it is what the support site and docs publish. It was
 deliberately migrated from `support@zkp2p.xyz` in #1209 (2026-07-16).
@@ -267,8 +264,8 @@ High-rated dynamic check — cannot run here at all, because it hard-requires
 - [x] No key-management permissions, so no audit
 - [x] Snapper scan run, no blockers
 - [x] Three 960×540 promotional images
-- [ ] Published to npm _(blocked — org package-creation rights)_
-- [ ] Repo public
+- [x] Published to npm — `@zkp2p/peer-cash-snap@0.1.0`
+- [x] Repo public
 - [ ] Snap Install Tester run under Flask
-- [ ] Escalation contact confirmed
+- [x] Escalation contact confirmed — `support@peer.xyz`
 - [ ] Demo video _(optional)_
