@@ -19,8 +19,12 @@ export type SupportedEnvironment = (typeof SUPPORTED_ENVIRONMENTS)[number];
  */
 export const RESTRICTED_PLATFORMS = new Set(['venmo', 'cashapp', 'paypal']);
 
-/** Companion dapp that submits the unsigned transaction plans. */
-export const COMPANION_DAPP_URL = 'http://localhost:8000';
+/**
+ * Companion dapp that submits the unsigned transaction plans. Shown on the
+ * home page and the install dialog, so it must be the hosted origin — a
+ * published snap cannot point its users at a localhost dev server.
+ */
+export const COMPANION_DAPP_URL = 'https://peer-cash-snap.vercel.app';
 
 /** Guidance shown when a restricted rail is requested. */
 export const RESTRICTED_REMEDIATION =

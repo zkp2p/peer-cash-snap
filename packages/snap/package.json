@@ -2,6 +2,19 @@
   "name": "@zkp2p/peer-cash-snap",
   "version": "0.1.0",
   "description": "MetaMask Snap for Peer Cash: cash out Base USDC to fiat at the live market rate.",
+  "keywords": [
+    "metamask-snap",
+    "metamask",
+    "peer",
+    "zkp2p",
+    "usdc",
+    "base",
+    "offramp"
+  ],
+  "homepage": "https://github.com/zkp2p/peer-cash-snap#readme",
+  "bugs": {
+    "url": "https://github.com/zkp2p/peer-cash-snap/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/zkp2p/peer-cash-snap.git"
