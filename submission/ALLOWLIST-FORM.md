@@ -26,6 +26,12 @@ and free of the banned words (MetaMask, meta, mask, snap).
 Peer
 ```
 
+> Inconsistency to settle first: `packages/snap/package.json` declares
+> `"author": "ZKP2P"`, while the sibling package `@zkp2p/cash` publishes
+> `"author": "Peer (https://peer.xyz)"`. Reviewers do cross-check npm metadata
+> against the form. Pick one — "Peer" matches the live brand, peer.xyz, and the
+> snap's own `proposedName` — and make the package agree before submitting.
+
 **4. Your company or brand website** _(required)_
 
 ```
@@ -132,8 +138,10 @@ Two caveats before using it here:
   is very likely an alias into it, but mail routing was not verified.
 
 Alternative if you want escalation separated from user support: `team@peer.xyz`,
-published as the Contact link on docs.peer.xyz. There is no `security@` anywhere
-in the fleet and no SECURITY.md — do not invent one.
+published as the Contact link on docs.peer.xyz. There is no `security@` mailbox
+anywhere in the fleet — do not invent one. `SECURITY.md` (added in #14) routes
+vulnerability reports through GitHub private advisories rather than email, so it
+does not supply an address for this field either.
 
 **18. Knowledge Base for users** _(optional)_
 
