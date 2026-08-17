@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "yarn install --immutable",
+  "buildCommand": "yarn workspace site build",
+  "outputDirectory": "packages/site/public"
+}
