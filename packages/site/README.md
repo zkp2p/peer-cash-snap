@@ -1,43 +1,49 @@
-# TypeScript Example Snap Front-end
+# Peer Cash companion dapp
 
-This project was bootstrapped with [Gatsby](https://www.gatsbyjs.com/).
+The site half of [`peer-cash-snap`](../../README.md): a Gatsby dapp that
+drives the Peer Cash off-ramp and submits the unsigned transaction plans the
+snap returns.
 
-## Available Scripts
+Hosted at https://peer-cash-snap.vercel.app.
 
-In the project directory, you can run:
+## Why a companion dapp exists
 
-### `yarn start`
+Snaps cannot call `eth_sendTransaction`. The snap owns `@zkp2p/cash`, the
+confirmation dialogs, and order state; this dapp owns the wallet connection
+and transaction submission. Every mutation is approved twice — once in the
+snap's dialog, once per transaction in MetaMask.
 
-Runs the app in the development mode.\
-Open [http://localhost:8000](http://localhost:8000) to view it in the browser.
+## Scripts
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+| Script       | What it does                              |
+| ------------ | ----------------------------------------- |
+| `yarn start` | `gatsby develop` on http://localhost:8000 |
+| `yarn build` | Production build into `public/`           |
+| `yarn lint`  | ESLint + Prettier                         |
 
-### `yarn build`
+Run both halves together with `yarn start` from the repository root.
 
-Builds the app for production to the `public` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Which snap it connects to
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+`src/config/snap.ts` reads `SNAP_ORIGIN`, falling back to
+`local:http://localhost:8080` so `yarn start` targets the locally served snap.
 
-See the section about [deployment](https://www.gatsbyjs.com/docs/how-to/previews-deploys-hosting/) for more information.
+Gatsby inlines every key from `.env.<stage>` into browser code, so the
+production origin is set in the committed `.env.production`:
 
-## Environment variables
+```shell
+SNAP_ORIGIN=npm:@zkp2p/peer-cash-snap
+```
 
-Gatsby has built-in support for loading environment variables into the browser and Functions. Loading environment variables into Node.js requires a small code snippet.
+That value is not a secret — it is the published npm snap id. To point a build
+at a different snap, override `SNAP_ORIGIN` for that build.
 
-In development, Gatsby will load environment variables from a file named `.env.development`. For builds, it will load from `.env.production`.
+## Layout
 
-By default you can use the `SNAP_ORIGIN` variable (used in `src/config/snap.ts`) to define a production origin for you snap (eg. `npm:MyPackageName`). If not defined it will defaults to `local:http://localhost:8080`.
-
-A `.env` file template is available, to use it rename `.env.production.dist` to `.env.production`
-
-To learn more visit [Gatsby documentation](https://www.gatsbyjs.com/docs/how-to/local-development/environment-variables/)
-
-## Learn More
-
-You can learn more in the [Gatsby documentation](https://www.gatsbyjs.com/docs/).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+| Path                | What it is                                            |
+| ------------------- | ----------------------------------------------------- |
+| `src/pages`         | The single page: connect, cash out, orders            |
+| `src/components`    | Cash-out form, order list, MetaMask connection UI     |
+| `src/hooks`         | Provider context, snap install, shared flow lifecycle |
+| `src/utils/cash.ts` | `wallet_invokeSnap` wrapper that propagates errors    |
+| `src/types`         | Wire types shared with the snap's RPC API             |

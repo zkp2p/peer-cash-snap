@@ -96,6 +96,17 @@ Errors keep Peer Cash's typed shape: the snap forwards `code`, `retryable`,
 | `snap_notify`               | In-app notifications on order state changes                                                                               |
 | `snap_manageState`          | Tracked orders (unencrypted: public protocol data only — deposit ids, amounts, states; payee handles are never persisted) |
 
+## Try it
+
+The snap is published as
+[`@zkp2p/peer-cash-snap`](https://www.npmjs.com/package/@zkp2p/peer-cash-snap)
+and the companion dapp is hosted at https://peer-cash-snap.vercel.app.
+
+Until the snap is allowlisted in the MetaMask Snaps Directory it installs only
+under [MetaMask Flask](https://metamask.io/flask/) — stable MetaMask refuses
+snaps that request protected permissions (this one needs
+`endowment:network-access` and `endowment:rpc`) unless they are allowlisted.
+
 ## Getting started
 
 Requirements: Node 18+ (Node 22+ recommended), Yarn (via corepack), and
@@ -164,7 +175,7 @@ the bundle in SES).
 - The dapp sends a single payout leg per order; the snap RPC already accepts
   multi-platform / multi-currency legs.
 - Cross-chain sources (Relay) are out of scope; cash out Base USDC directly.
-- Local/Flask distribution only; publishing to npm and the MetaMask allowlist
-  is a follow-up.
+- Flask-only distribution until the MetaMask allowlist request is approved.
+  The npm package is published; the directory listing is not.
 - `cash_getOrders` trusts the dapp-supplied `owner` for the indexer read;
   order data is public protocol state, and mutations are always dialog-gated.
