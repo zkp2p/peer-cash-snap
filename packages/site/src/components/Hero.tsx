@@ -60,7 +60,7 @@ const ActionNote = styled.p`
 const Rails = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.small};
   color: ${({ theme }) => theme.colors.text?.muted};
-  margin: 4.8rem 0 0 0;
+  margin: 4rem 0 0 0;
   text-align: center;
   ${({ theme }) => theme.mediaQueries.small} {
     margin-top: 3.2rem;
@@ -73,7 +73,7 @@ const Steps = styled.ol`
   gap: 3.2rem;
   width: 100%;
   list-style: none;
-  margin: 2.4rem 0 0 0;
+  margin: 3.2rem 0 0 0;
   padding: 3.2rem 0 0 0;
   border-top: 1px solid ${({ theme }) => theme.colors.border?.default};
   ${({ theme }) => theme.mediaQueries.small} {

@@ -230,13 +230,13 @@ const Index = () => {
     <Container>
       {error && (
         <ErrorMessage>
-          <b>An error happened:</b> {error.message}
+          <b>Something went wrong.</b> {error.message}
         </ErrorMessage>
       )}
 
       {isReady && provider && account && capabilities ? (
         <AppView>
-          <AppHeading>Peer Cash</AppHeading>
+          <AppHeading>Cash out USDC</AppHeading>
           <ToolbarRow>
             <AccountBadge title={account}>
               Wallet: {shorten(account)}

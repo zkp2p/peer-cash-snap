@@ -25,9 +25,6 @@ const Title = styled.span`
   text-transform: uppercase;
   line-height: 1;
   margin: 0;
-  ${({ theme }) => theme.mediaQueries.small} {
-    display: none;
-  }
 `;
 
 const LogoWrapper = styled.div`
