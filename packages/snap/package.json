@@ -28,7 +28,7 @@
     "test": "yarn build && jest"
   },
   "dependencies": {
-    "@metamask/snaps-sdk": "~10.3.0",
+    "@metamask/snaps-sdk": "~12.0.0",
     "@zkp2p/cash": "0.4.9",
     "viem": "~2.37.3",
     "zod": "^4.4.3"
