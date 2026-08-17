@@ -1,97 +1,134 @@
 import type { ComponentProps } from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { ReactComponent as FlaskFox } from '../assets/flask_fox.svg';
+import { igniteGradient, igniteGradientHover } from '../config/theme';
 import { useMetaMask, useRequestSnap } from '../hooks';
 import { shouldDisplayReconnectButton } from '../utils';
 
-const Link = styled.a`
-  display: flex;
+// The IGNITE gradient marks the primary action and nothing else. Peer's brand
+// book reserves it for calls to action, so only the install and connect
+// controls wear it; every other control keeps the neutral chrome from
+// GlobalStyle.
+const primaryChrome = css`
+  display: inline-flex;
   align-self: flex-start;
   align-items: center;
   justify-content: center;
-  font-size: ${(props) => props.theme.fontSizes.small};
-  border-radius: ${(props) => props.theme.radii.button};
-  border: 1px solid ${(props) => props.theme.colors.background?.inverse};
-  background-color: ${(props) => props.theme.colors.background?.inverse};
-  color: ${(props) => props.theme.colors.text?.inverse};
+  gap: 1rem;
+  min-height: 4rem;
+  padding: 0 1.6rem;
+  font-size: ${({ theme }) => theme.fontSizes.small};
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   text-decoration: none;
-  font-weight: bold;
-  padding: 1rem;
+  border: 1px solid transparent;
+  border-radius: ${({ theme }) => theme.radii.button};
+  background-image: ${igniteGradient};
+  color: #000000;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: background-image 0.15s ease, opacity 0.15s ease;
 
   &:hover {
-    background-color: transparent;
-    border: 1px solid ${(props) => props.theme.colors.background?.inverse};
-    color: ${(props) => props.theme.colors.text?.default};
+    background-image: ${igniteGradientHover};
+    color: #000000;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.text?.default};
+    outline-offset: 2px;
+  }
+
+  /* An unavailable action drops the gradient rather than dimming it into a
+     muddy smear. */
+  &:disabled,
+  &[disabled],
+  &:disabled:hover,
+  &[disabled]:hover {
+    background-image: none;
+    border-color: ${({ theme }) => theme.colors.border?.default};
+    color: ${({ theme }) => theme.colors.text?.muted};
+    cursor: not-allowed;
+  }
+
+  svg {
+    flex: none;
   }
 
   ${({ theme }) => theme.mediaQueries.small} {
     width: 100%;
-    box-sizing: border-box;
   }
 `;
 
-const Button = styled.button`
-  display: flex;
+const Link = styled.a`
+  ${primaryChrome}
+`;
+
+/** The single primary action on a view. Wears the IGNITE gradient. */
+export const PrimaryButton = styled.button`
+  ${primaryChrome}
+`;
+
+const SecondaryButton = styled.button`
+  display: inline-flex;
   align-self: flex-start;
   align-items: center;
   justify-content: center;
+  gap: 1rem;
   margin-top: auto;
   ${({ theme }) => theme.mediaQueries.small} {
     width: 100%;
   }
 `;
 
-const ButtonText = styled.span`
-  margin-left: 1rem;
-`;
-
 const ConnectedContainer = styled.div`
   display: flex;
   align-self: flex-start;
   align-items: center;
-  justify-content: center;
+  gap: 1rem;
   font-size: ${(props) => props.theme.fontSizes.small};
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   border-radius: ${(props) => props.theme.radii.button};
-  border: 1px solid ${(props) => props.theme.colors.background?.inverse};
-  background-color: ${(props) => props.theme.colors.background?.inverse};
-  color: ${(props) => props.theme.colors.text?.inverse};
-  font-weight: bold;
-  padding: 1.2rem;
+  border: 1px solid ${(props) => props.theme.colors.border?.default};
+  color: ${(props) => props.theme.colors.text?.default};
+  min-height: 4rem;
+  padding: 0 1.6rem;
 `;
 
 const ConnectedIndicator = styled.div`
-  content: ' ';
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background-color: green;
+  background-color: ${({ theme }) => theme.colors.success?.default};
 `;
 
 export const InstallFlaskButton = () => (
   <Link href="https://metamask.io/flask/" target="_blank">
     <FlaskFox />
-    <ButtonText>Install MetaMask Flask</ButtonText>
+    Install MetaMask Flask
   </Link>
 );
 
-export const ConnectButton = (props: ComponentProps<typeof Button>) => {
+export const ConnectButton = (props: ComponentProps<typeof PrimaryButton>) => {
   return (
-    <Button {...props}>
+    <PrimaryButton {...props}>
       <FlaskFox />
-      <ButtonText>Connect</ButtonText>
-    </Button>
+      Connect
+    </PrimaryButton>
   );
 };
 
-export const ReconnectButton = (props: ComponentProps<typeof Button>) => {
+export const ReconnectButton = (
+  props: ComponentProps<typeof SecondaryButton>,
+) => {
   return (
-    <Button {...props}>
+    <SecondaryButton {...props}>
       <FlaskFox />
-      <ButtonText>Reconnect</ButtonText>
-    </Button>
+      Reconnect
+    </SecondaryButton>
   );
 };
 
@@ -114,7 +151,7 @@ export const HeaderButtons = () => {
   return (
     <ConnectedContainer>
       <ConnectedIndicator />
-      <ButtonText>Connected</ButtonText>
+      Connected
     </ConnectedContainer>
   );
 };

@@ -10,15 +10,21 @@ const HeaderWrapper = styled.header`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 2.4rem;
+  gap: 1.6rem;
+  padding: 1.6rem 3.2rem;
   border-bottom: 1px solid ${(props) => props.theme.colors.border?.default};
+  ${({ theme }) => theme.mediaQueries.small} {
+    padding: 1.6rem;
+  }
 `;
 
-const Title = styled.p`
-  font-size: ${(props) => props.theme.fontSizes.title};
-  font-weight: bold;
+const Title = styled.span`
+  font-family: ${({ theme }) => theme.fonts.headline};
+  font-size: ${(props) => props.theme.fontSizes.large};
+  font-weight: 600;
+  text-transform: uppercase;
+  line-height: 1;
   margin: 0;
-  margin-left: 1.2rem;
   ${({ theme }) => theme.mediaQueries.small} {
     display: none;
   }
@@ -28,12 +34,14 @@ const LogoWrapper = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  gap: 1.2rem;
 `;
 
 const RightContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  gap: 1.6rem;
 `;
 
 export const Header = ({
@@ -46,7 +54,7 @@ export const Header = ({
   return (
     <HeaderWrapper>
       <LogoWrapper>
-        <SnapLogo color={theme.colors.icon?.default} size={36} />
+        <SnapLogo color={theme.colors.icon?.default} size={24} />
         <Title>Peer Cash</Title>
       </LogoWrapper>
       <RightContainer>

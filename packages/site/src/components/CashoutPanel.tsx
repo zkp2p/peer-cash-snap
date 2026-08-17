@@ -35,14 +35,14 @@ const Field = styled.label`
   flex-direction: column;
   font-size: ${({ theme }) => theme.fontSizes.small};
   color: ${({ theme }) => theme.colors.text?.muted};
-  gap: 0.4rem;
+  gap: 0.6rem;
   flex: 1;
   min-width: 16rem;
 `;
 
 const EstimateLine = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.text};
-  margin: 0.4rem 0 1.6rem 0;
+  margin: 0.4rem 0 2rem 0;
 `;
 
 const Hint = styled.span`
@@ -56,6 +56,7 @@ const ActionButton = styled.button`
 
 const SuccessText = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.small};
+  color: ${({ theme }) => theme.colors.success?.default};
   margin: 1.2rem 0 0 0;
   word-break: break-all;
 `;

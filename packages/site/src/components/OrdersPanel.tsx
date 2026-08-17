@@ -13,7 +13,8 @@ const TitleRow = styled.div`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.2rem;
+  gap: 1.2rem;
+  margin-bottom: 1.6rem;
 `;
 
 const Title = styled.h2`
@@ -23,9 +24,13 @@ const Title = styled.h2`
 
 const OrderCard = styled.div`
   border: 1px solid ${({ theme }) => theme.colors.border?.default};
-  border-radius: ${({ theme }) => theme.radii.default};
+  border-radius: ${({ theme }) => theme.radii.inner};
   padding: 1.6rem;
   margin-bottom: 1.2rem;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
 `;
 
 const OrderHead = styled.div`
@@ -43,24 +48,27 @@ const OrderId = styled.code`
 
 const StateChip = styled.span<{ inFlight: boolean }>`
   font-size: ${({ theme }) => theme.fontSizes.small};
-  border-radius: 999px;
-  padding: 0.2rem 1rem;
+  border-radius: ${({ theme }) => theme.radii.pill};
+  padding: 0.4rem 1.2rem;
+  white-space: nowrap;
   border: 1px solid ${({ theme }) => theme.colors.border?.default};
+  color: ${({ inFlight, theme }) =>
+    inFlight ? theme.colors.text?.default : theme.colors.text?.muted};
   background: ${({ inFlight, theme }) =>
     inFlight
-      ? (theme.colors.primary?.muted ?? 'transparent')
-      : (theme.colors.background?.alternative ?? 'transparent')};
+      ? (theme.colors.background?.alternative ?? 'transparent')
+      : 'transparent'};
 `;
 
 const Explain = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.text};
-  margin: 0.8rem 0;
+  margin: 1.2rem 0 0.4rem 0;
 `;
 
 const Amounts = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.small};
   color: ${({ theme }) => theme.colors.text?.muted};
-  margin: 0 0 0.8rem 0;
+  margin: 0 0 1.6rem 0;
 `;
 
 const ButtonRow = styled.div`
