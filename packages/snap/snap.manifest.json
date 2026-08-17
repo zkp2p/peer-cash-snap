@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cash out Base USDC to fiat at the live market rate with Peer.",
   "proposedName": "Peer Cash",
   "repository": {
@@ -7,7 +7,7 @@
     "url": "https://github.com/zkp2p/peer-cash-snap.git"
   },
   "source": {
-    "shasum": "DTg/2rdRpVg/HkWQnVVUASu9ica3bxXB53UpYdPrBZ0=",
+    "shasum": "3ykr2Eg14vXKEVOBTW7pX2ew8O9NPIEiqlcVGEq+nfo=",
     "location": {
       "npm": {
         "filePath": "dist/bundle.js",
