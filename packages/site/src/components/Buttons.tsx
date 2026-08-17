@@ -28,7 +28,9 @@ const primaryChrome = css`
   background-image: ${igniteGradient};
   color: #000000;
   cursor: pointer;
-  transition: background-image 0.15s ease, opacity 0.15s ease;
+  transition:
+    background-image 0.15s ease,
+    opacity 0.15s ease;
 
   &:hover {
     background-image: ${igniteGradientHover};

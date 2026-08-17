@@ -2,6 +2,11 @@
  * The official Peer mark, the same glyph the snap ships as its icon
  * (`packages/snap/images/icon.svg`). Sized by height so the mark keeps its
  * drawn proportions.
+ *
+ * @param props - Component props.
+ * @param props.color - Fill for the mark.
+ * @param props.size - Rendered height in pixels; width follows the aspect ratio.
+ * @returns The Peer mark.
  */
 export const SnapLogo = ({
   color,

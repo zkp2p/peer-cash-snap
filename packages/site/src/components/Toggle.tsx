@@ -41,7 +41,9 @@ const ToggleTrack = styled.span<CheckedProps>`
   border: 1px solid ${({ theme }) => theme.colors.border?.default};
   background-color: ${({ checked, theme }) =>
     checked ? theme.colors.background?.alternative : 'transparent'};
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 
   &::after {
     content: '';
