@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "license": "(MIT-0 OR Apache-2.0)",
+  "author": "Peer (https://peer.xyz)",
   "scripts": {
     "allow-scripts": "yarn workspace root allow-scripts",
     "build": "GATSBY_TELEMETRY_DISABLED=1 gatsby build",
