@@ -2946,17 +2946,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@metamask/eslint-config-nodejs@npm:^14.0.0":
-  version: 14.0.0
-  resolution: "@metamask/eslint-config-nodejs@npm:14.0.0"
+"@metamask/eslint-config-nodejs@npm:^15.0.1":
+  version: 15.0.1
+  resolution: "@metamask/eslint-config-nodejs@npm:15.0.1"
   dependencies:
     "@eslint/js": ^9.11.0
     globals: ^15.9.0
   peerDependencies:
-    "@metamask/eslint-config": ^14.0.0
+    "@metamask/eslint-config": "workspace:^"
     eslint: ^9.11.0
     eslint-plugin-n: ^17.10.3
-  checksum: 0a7f723ec56b739dbe2f2118da63dc03110e82ae9fbfb1e59b98578f19b6eb867bcd1a7c03e7ca5b174fe52037401475fdee726dfe3906b026cee794547a20f2
+  checksum: 1f45c18fbdeeb94518de52ab8b23e470c208e9a54ff2e2aad621c228bc1d6b472514b97b703b43e849e2df007690ed84477b3d00b9eac5edea84482ec5a10011
   languageName: node
   linkType: hard
 
@@ -16191,7 +16191,7 @@ __metadata:
     "@metamask/eslint-config": ^14.0.0
     "@metamask/eslint-config-browser": ^14.0.0
     "@metamask/eslint-config-jest": ^14.0.0
-    "@metamask/eslint-config-nodejs": ^14.0.0
+    "@metamask/eslint-config-nodejs": ^15.0.1
     "@metamask/eslint-config-typescript": ^14.0.0
     eslint: ^9.11.0
     eslint-config-prettier: ^9.1.0
