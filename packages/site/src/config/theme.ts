@@ -9,7 +9,9 @@ const breakpoints = ['600px', '768px', '992px'];
  * cannot depend on that package, so the tokens it uses are copied verbatim
  * rather than approximated.
  *
- * PP Valve is always uppercase; Inter carries body and UI text.
+ * Inter carries all text. Peer's headline face, PP Valve, is licensed but has
+ * no stable public URL to reference from this repository, so it is not used
+ * here yet; headlines use Inter SemiBold uppercase instead.
  */
 const brand = {
   black: '#000000',
@@ -41,7 +43,7 @@ export const igniteGradientHover = `linear-gradient(90deg, ${brand.igniteYellow}
  */
 const theme = {
   fonts: {
-    headline: `'PP Valve', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`,
+    headline: `'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`,
     default: `'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif`,
     code: 'ui-monospace,Menlo,Monaco,"Cascadia Mono","Segoe UI Mono","Roboto Mono","Oxygen Mono","Ubuntu Monospace","Source Code Pro","Fira Mono","Droid Sans Mono","Courier New", monospace',
   },
@@ -157,16 +159,7 @@ export const dark: DefaultTheme = {
  * @returns Global style React component.
  */
 export const GlobalStyle = createGlobalStyle`
-  /* Peer brand faces, served from static/fonts. PP Valve is headline-only and
-     always uppercase; Inter carries everything else. */
-  @font-face {
-    font-family: 'PP Valve';
-    src: url('/fonts/PPValve-PlainSemibold.woff2') format('woff2');
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
-  }
-
+  /* Peer brand faces, served from static/fonts. */
   @font-face {
     font-family: 'Inter';
     src: url('/fonts/Inter-Medium.woff2') format('woff2');
