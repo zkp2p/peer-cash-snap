@@ -20,6 +20,7 @@
     "url": "https://github.com/zkp2p/peer-cash-snap.git"
   },
   "license": "(MIT-0 OR Apache-2.0)",
+  "author": "ZKP2P",
   "main": "./dist/bundle.js",
   "files": [
     "dist/",

@@ -62,9 +62,14 @@ node_modules/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
+# dotenv environment variables files.
+# `packages/site/.env.production` is deliberately committed: it holds the
+# public SNAP_ORIGIN (the published npm snap id), which is not a secret.
 .env
 .env.test
+.env.local
+.env.development
+.env.*.local
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
