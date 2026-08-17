@@ -5,89 +5,57 @@ type CheckedProps = {
   readonly checked: boolean;
 };
 
-const ToggleWrapper = styled.div`
-  touch-action: pan-x;
-  display: inline-block;
+// A monochrome switch. The theme is a preference, not a primary action, so it
+// stays neutral chrome and never takes the IGNITE gradient.
+const ToggleWrapper = styled.label`
   position: relative;
+  display: inline-flex;
+  align-items: center;
   cursor: pointer;
-  background-color: transparent;
-  border: 0;
-  padding: 0;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
   user-select: none;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   -webkit-tap-highlight-color: transparent;
-  margin-right: 2.4rem;
-  ${({ theme }) => theme.mediaQueries.small} {
-    margin-right: 2.4rem;
-  }
 `;
 
 const ToggleInput = styled.input`
-  border: 0;
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
   position: absolute;
   width: 1px;
-`;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
 
-const IconContainer = styled.div`
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  top: 0;
-  bottom: 0;
-  margin-top: auto;
-  margin-bottom: auto;
-  line-height: 0;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  & > * {
-    align-items: center;
-    display: flex;
-    height: 22px;
-    justify-content: center;
-    position: relative;
-    width: 22px;
+  &:focus-visible + span {
+    outline: 2px solid ${({ theme }) => theme.colors.text?.default};
+    outline-offset: 2px;
   }
 `;
 
-const CheckedContainer = styled(IconContainer)<CheckedProps>`
-  opacity: ${({ checked }) => (checked ? 1 : 0)};
-  left: 10px;
-`;
+const ToggleTrack = styled.span<CheckedProps>`
+  display: block;
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: ${({ theme }) => theme.radii.pill};
+  border: 1px solid ${({ theme }) => theme.colors.border?.default};
+  background-color: ${({ checked, theme }) =>
+    checked ? theme.colors.background?.alternative : 'transparent'};
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 
-const UncheckedContainer = styled(IconContainer)<CheckedProps>`
-  opacity: ${({ checked }) => (checked ? 0 : 1)};
-  right: 10px;
-`;
-
-const ToggleContainer = styled.div`
-  width: 68px;
-  height: 36px;
-  padding: 0;
-  border-radius: 36px;
-  background-color: ${({ theme }) => theme.colors.background?.alternative};
-  transition: all 0.2s ease;
-`;
-
-const ToggleCircle = styled.div<CheckedProps>`
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1) 0ms;
-  position: absolute;
-  top: 4px;
-  left: ${({ checked }) => (checked ? '36px' : '4px')};
-  width: 28px;
-  height: 28px;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.14);
-  border-radius: 50%;
-  background-color: #ffffff;
-  box-sizing: border-box;
-  transition: all 0.25s ease;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: ${({ checked }) => (checked ? '23px' : '3px')};
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: ${({ theme }) => theme.colors.icon?.default};
+    transition: left 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+  }
 `;
 
 export const Toggle = ({
@@ -105,17 +73,15 @@ export const Toggle = ({
   };
 
   return (
-    <ToggleWrapper onClick={handleChange}>
-      <ToggleContainer>
-        <CheckedContainer checked={checked}>
-          <span>🌞</span>
-        </CheckedContainer>
-        <UncheckedContainer checked={checked}>
-          <span>🌜</span>
-        </UncheckedContainer>
-      </ToggleContainer>
-      <ToggleCircle checked={checked} />
-      <ToggleInput type="checkbox" aria-label="Toggle Button" />
+    <ToggleWrapper>
+      <ToggleInput
+        type="checkbox"
+        role="switch"
+        aria-label="Dark theme"
+        checked={checked}
+        onChange={handleChange}
+      />
+      <ToggleTrack checked={checked} />
     </ToggleWrapper>
   );
 };

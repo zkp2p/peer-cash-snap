@@ -4,10 +4,10 @@ import styled from 'styled-components';
 import {
   CashoutPanel,
   ConnectButton,
+  Hero,
   InstallFlaskButton,
   OrdersPanel,
-  ReconnectButton,
-  Card,
+  PrimaryButton,
 } from '../components';
 import { SmallSelect } from '../components/panelStyles';
 import { defaultSnapOrigin } from '../config';
@@ -16,72 +16,46 @@ import type { CapabilitiesView, SupportedEnvironment } from '../types/cash';
 import { isLocalSnap, shouldDisplayReconnectButton } from '../utils';
 import { invokeCash, shorten } from '../utils/cash';
 
+// `flex: 1` plus centring keeps a short page filling the viewport instead of
+// leaving a dead band above the footer; taller content grows past the centre
+// and scrolls normally.
 const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   flex: 1;
-  margin-top: 7.6rem;
-  margin-bottom: 7.6rem;
+  width: 100%;
+  padding: 6.4rem 3.2rem;
   ${({ theme }) => theme.mediaQueries.small} {
-    padding-left: 2.4rem;
-    padding-right: 2.4rem;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-    width: auto;
+    padding: 3.2rem 1.6rem;
   }
 `;
 
-const Heading = styled.h1`
-  margin-top: 0;
-  margin-bottom: 2.4rem;
-  text-align: center;
-`;
-
-const Span = styled.span`
-  color: ${(props) => props.theme.colors.primary?.default};
-`;
-
-const Subtitle = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.large};
-  font-weight: 500;
-  margin-top: 0;
-  margin-bottom: 0;
-  text-align: center;
-  max-width: 64.8rem;
-  ${({ theme }) => theme.mediaQueries.small} {
-    font-size: ${({ theme }) => theme.fontSizes.text};
-  }
-`;
-
-const CardContainer = styled.div`
+const AppView = styled.section`
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+`;
+
+const AppHeading = styled.h1`
+  font-size: ${({ theme }) => theme.fontSizes.title};
+  margin: 0;
   max-width: 64.8rem;
   width: 100%;
-  height: 100%;
-  margin-top: 1.5rem;
 `;
 
 const ErrorMessage = styled.div`
   background-color: ${({ theme }) => theme.colors.error?.muted};
   border: 1px solid ${({ theme }) => theme.colors.error?.default};
-  color: ${({ theme }) => theme.colors.error?.alternative};
-  border-radius: ${({ theme }) => theme.radii.default};
-  padding: 2.4rem;
+  color: ${({ theme }) => theme.colors.error?.default};
+  border-radius: ${({ theme }) => theme.radii.inner};
+  padding: 1.6rem 2rem;
   margin-bottom: 2.4rem;
-  margin-top: 2.4rem;
-  max-width: 60rem;
   width: 100%;
+  max-width: 64.8rem;
   word-break: break-word;
-  ${({ theme }) => theme.mediaQueries.small} {
-    padding: 1.6rem;
-    margin-bottom: 1.2rem;
-    margin-top: 1.2rem;
-    max-width: 100%;
-  }
 `;
 
 const ToolbarRow = styled.div`
@@ -90,10 +64,19 @@ const ToolbarRow = styled.div`
   align-items: center;
   gap: 1.2rem;
   flex-wrap: wrap;
-  margin-top: 2.4rem;
+  margin-top: 1.6rem;
   max-width: 64.8rem;
   width: 100%;
   justify-content: space-between;
+`;
+
+const EnvironmentField = styled.label`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: ${({ theme }) => theme.fontSizes.small};
+  color: ${({ theme }) => theme.colors.text?.muted};
 `;
 
 const AccountBadge = styled.code`
@@ -196,92 +179,72 @@ const Index = () => {
     }
   };
 
+  const isReady = Boolean(provider && installedSnap && account && capabilities);
+
+  // One primary action per pre-connected state, so the hero never shows two
+  // competing calls to action.
+  const heroAction = () => {
+    if (!isMetaMaskReady) {
+      return {
+        action: <InstallFlaskButton />,
+        note: 'Snaps are pre-release software, available today in MetaMask Flask.',
+      };
+    }
+    if (!installedSnap) {
+      return {
+        action: <ConnectButton onClick={requestSnap} />,
+        note: 'Installs the Peer Cash snap and reviews its permissions in MetaMask.',
+      };
+    }
+    if (shouldDisplayReconnectButton(installedSnap)) {
+      return {
+        action: (
+          <PrimaryButton
+            onClick={() => {
+              connectAccount().catch(() => undefined);
+            }}
+          >
+            Connect wallet account
+          </PrimaryButton>
+        ),
+        note: 'Connected to a locally served snap. Use Reconnect in the header to reinstall the latest build.',
+      };
+    }
+    return {
+      action: (
+        <PrimaryButton
+          onClick={() => {
+            connectAccount().catch(() => undefined);
+          }}
+        >
+          Connect wallet account
+        </PrimaryButton>
+      ),
+      note: 'The snap is installed. Connect an account to start a cash-out.',
+    };
+  };
+
+  const { action, note } = heroAction();
+
   return (
     <Container>
-      <Heading>
-        <Span>Peer Cash</Span> · cash out USDC from MetaMask
-      </Heading>
-      <Subtitle>
-        Escrow Base USDC in the ZKP2P protocol and get paid on a fiat rail at
-        the live oracle rate. The snap reviews every request, returns unsigned
-        transactions, and tracks your orders; MetaMask confirms every
-        transaction.
-      </Subtitle>
-      <CardContainer>
-        {error && (
-          <ErrorMessage>
-            <b>An error happened:</b> {error.message}
-          </ErrorMessage>
-        )}
-        {!isMetaMaskReady && (
-          <Card
-            content={{
-              title: 'Install MetaMask Flask',
-              description:
-                'Snaps is pre-release software only available in MetaMask Flask, a canary distribution for developers with access to upcoming features.',
-              button: <InstallFlaskButton />,
-            }}
-            fullWidth
-          />
-        )}
-        {!installedSnap && (
-          <Card
-            content={{
-              title: 'Install the Peer Cash snap',
-              description:
-                'Connect MetaMask and install the Peer Cash snap to start cashing out.',
-              button: (
-                <ConnectButton
-                  onClick={requestSnap}
-                  disabled={!isMetaMaskReady}
-                />
-              ),
-            }}
-            disabled={!isMetaMaskReady}
-            fullWidth
-          />
-        )}
-        {shouldDisplayReconnectButton(installedSnap) && (
-          <Card
-            content={{
-              title: 'Reconnect',
-              description:
-                'While connected to a locally running snap, this button re-installs the latest local build.',
-              button: (
-                <ReconnectButton
-                  onClick={requestSnap}
-                  disabled={!installedSnap}
-                />
-              ),
-            }}
-            disabled={!installedSnap}
-            fullWidth
-          />
-        )}
-      </CardContainer>
+      {error && (
+        <ErrorMessage>
+          <b>Something went wrong.</b> {error.message}
+        </ErrorMessage>
+      )}
 
-      {installedSnap && provider ? (
-        <>
+      {isReady && provider && account && capabilities ? (
+        <AppView>
+          <AppHeading>Cash out USDC</AppHeading>
           <ToolbarRow>
-            <div>
-              {account ? (
-                <AccountBadge title={account}>
-                  Wallet: {shorten(account)}
-                </AccountBadge>
-              ) : (
-                <button
-                  onClick={() => {
-                    connectAccount().catch(() => undefined);
-                  }}
-                >
-                  Connect wallet account
-                </button>
-              )}
-            </div>
-            <div>
-              Environment:{' '}
+            <AccountBadge title={account}>
+              Wallet: {shorten(account)}
+            </AccountBadge>
+            <EnvironmentField>
+              Environment
               <SmallSelect
-                value={capabilities?.environment ?? 'production'}
+                value={capabilities.environment}
                 onChange={(event) => {
                   switchEnvironment(event.target.value).catch(() => undefined);
                 }}
@@ -292,28 +255,55 @@ const Index = () => {
                   </option>
                 ))}
               </SmallSelect>
-            </div>
+            </EnvironmentField>
           </ToolbarRow>
-
-          {account && capabilities ? (
-            <>
-              <CashoutPanel
-                provider={provider}
-                account={account}
-                capabilities={capabilities}
-                onCompleted={() => setRefreshKey((key) => key + 1)}
-              />
-              <OrdersPanel
-                provider={provider}
-                account={account}
-                refreshKey={refreshKey}
-              />
-            </>
-          ) : null}
-        </>
-      ) : null}
+          <CashoutPanel
+            provider={provider}
+            account={account}
+            capabilities={capabilities}
+            onCompleted={() => setRefreshKey((key) => key + 1)}
+          />
+          <OrdersPanel
+            provider={provider}
+            account={account}
+            refreshKey={refreshKey}
+          />
+        </AppView>
+      ) : (
+        <Hero action={action} actionNote={note} />
+      )}
     </Container>
   );
 };
 
 export default Index;
+
+const TITLE = 'Peer Cash · cash out USDC from MetaMask';
+const DESCRIPTION =
+  'Escrow Base USDC in the ZKP2P protocol and get paid on Revolut, Wise, Zelle or Chime at the live oracle rate. No custodian, and the snap never holds your keys.';
+const SITE_URL = 'https://peer-cash-snap.vercel.app';
+
+/**
+ * Document head for the single page. Gatsby has no default title, so without
+ * this the tab and every link preview are blank.
+ *
+ * @returns The head elements.
+ */
+export const Head = () => (
+  <>
+    <title>{TITLE}</title>
+    <meta name="description" content={DESCRIPTION} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Peer Cash" />
+    <meta property="og:title" content={TITLE} />
+    <meta property="og:description" content={DESCRIPTION} />
+    <meta property="og:url" content={SITE_URL} />
+    <meta property="og:image" content={`${SITE_URL}/og.png`} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={TITLE} />
+    <meta name="twitter:description" content={DESCRIPTION} />
+    <meta name="twitter:image" content={`${SITE_URL}/og.png`} />
+  </>
+);

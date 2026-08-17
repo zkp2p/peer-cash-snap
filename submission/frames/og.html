@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<style>
+  @font-face { font-family:'Inter'; src:url('../../packages/site/static/fonts/Inter-Medium.woff2') format('woff2'); font-weight:500; }
+  @font-face { font-family:'Inter'; src:url('../../packages/site/static/fonts/Inter-SemiBold.woff2') format('woff2'); font-weight:600; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html, body { width:1200px; height:630px; overflow:hidden; }
+  body {
+    background:#000000; color:#FFFFFF;
+    font-family:'Inter', -apple-system, sans-serif; font-weight:500;
+    -webkit-font-smoothing:antialiased; position:relative;
+  }
+  body::after {
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(1100px 600px at 88% -12%, rgba(255,58,51,.16), transparent 62%);
+  }
+  .frame { position:relative; z-index:1; width:1200px; height:630px; padding:72px; display:flex; flex-direction:column; }
+  .brand { display:flex; align-items:center; gap:16px; }
+  .mark { width:44px; height:44px; border-radius:10px; }
+  .name { font-size:22px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; }
+  h1 { font-size:76px; line-height:.98; font-weight:600; text-transform:uppercase; letter-spacing:-.01em; margin-top:56px; max-width:16ch; }
+  .accent { background:linear-gradient(90deg,#FFE500,#FF3A33); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .lede { font-size:24px; line-height:1.45; color:#9A9A9A; max-width:44ch; margin-top:28px; }
+  .spacer { flex:1; }
+  .rails { display:flex; gap:10px; }
+  .chip { font-size:17px; padding:8px 18px; border-radius:999px; border:1px solid #383838; color:#EEEEEE; background:#101010; }
+</style>
+</head>
+<body><div class="frame">
+
+  <div class="brand">
+    <img class="mark" src="icon.svg" alt="">
+    <span class="name">Peer Cash</span>
+  </div>
+
+  <h1>Cash out USDC <span class="accent">without a custodian</span></h1>
+
+  <p class="lede">
+    Escrow Base USDC in the ZKP2P protocol and get paid on a fiat rail you
+    already use, at the live oracle rate.
+  </p>
+
+  <div class="spacer"></div>
+
+  <div class="rails">
+    <span class="chip">Revolut</span>
+    <span class="chip">Wise</span>
+    <span class="chip">Zelle</span>
+    <span class="chip">Chime</span>
+  </div>
+
+</div></body></html>

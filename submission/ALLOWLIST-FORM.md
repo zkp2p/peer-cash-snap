@@ -78,12 +78,12 @@ Confirmed: the repository is public.
 https://www.npmjs.com/package/@zkp2p/peer-cash-snap
 ```
 
-Confirmed: `@zkp2p/peer-cash-snap@0.1.0` is published and live on npm.
+Confirmed: `@zkp2p/peer-cash-snap@0.1.1` is published and live on npm as `latest`.
 
 **10. Snap version to be allowlisted** _(required)_
 
 ```
-0.1.0
+0.1.1
 ```
 
 **11. Verified no errors in the CLI?** _(required checkbox)_
@@ -101,7 +101,8 @@ pass.
 **13. Is the icon for your Snap correct?** _(required checkbox)_
 
 Yes. `packages/snap/images/icon.svg` is a valid square SVG (512×512 viewBox), a
-solid `#FFE500` rounded square with the Peer mark in `#181818` — opaque, so it
+solid `#000000` rounded square with the Peer mark in `#FFFFFF` — the official
+brand pairing, matching `peer400x400.png`, and opaque so it
 reads on both light and dark backgrounds.
 
 **14. URL to Snap audit report** _(optional)_ — leave blank
@@ -226,7 +227,7 @@ MetaMask assigns these during review; there is no field for either.
     ]
   },
   "versions": {
-    "0.1.0": { "checksum": "DTg/2rdRpVg/HkWQnVVUASu9ica3bxXB53UpYdPrBZ0=" }
+    "0.1.1": { "checksum": "3ykr2Eg14vXKEVOBTW7pX2ew8O9NPIEiqlcVGEq+nfo=" }
   }
 }
 ```
@@ -256,7 +257,7 @@ High-rated dynamic check — cannot run here at all, because it hard-requires
 
 ## Pre-submission checklist
 
-- [x] `version` identical in `package.json` and `snap.manifest.json` (0.1.0)
+- [x] `version` identical in `package.json` and `snap.manifest.json` (0.1.1)
 - [x] `source.location.npm.packageName` matches the package name
 - [x] `source.shasum` matches the built bundle
 - [x] Icon is a square SVG referenced by `iconPath`
@@ -264,7 +265,7 @@ High-rated dynamic check — cannot run here at all, because it hard-requires
 - [x] No key-management permissions, so no audit
 - [x] Snapper scan run, no blockers
 - [x] Three 960×540 promotional images
-- [x] Published to npm — `@zkp2p/peer-cash-snap@0.1.0`
+- [x] Published to npm — `@zkp2p/peer-cash-snap@0.1.1`
 - [x] Repo public
 - [ ] Snap Install Tester run under Flask
 - [x] Escalation contact confirmed — `support@peer.xyz`
