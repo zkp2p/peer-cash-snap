@@ -1,0 +1,57 @@
+name: Bug report
+description: Something in the snap or the companion dapp does not work.
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not use this form for security vulnerabilities. Report those
+        privately through the repository's Security tab.
+
+        Never paste a private key, seed phrase, or payee handle into an issue.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Connect the wallet at ...
+        2. Cash out ... USDC to ...
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: deposit-id
+    attributes:
+      label: Deposit id
+      description: The `depositId` of the affected order, if there is one. Public on-chain data.
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - production
+        - preproduction
+        - staging
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Snap version, MetaMask or Flask version, and browser.
+      placeholder: 'snap 0.1.0, Flask 12.x, Chrome 131'
+    validations:
+      required: true
+  - type: textarea
+    id: errors
+    attributes:
+      label: Errors
+      description: Console output or the JSON-RPC error `data` (`code`, `remediation`).
+      render: text

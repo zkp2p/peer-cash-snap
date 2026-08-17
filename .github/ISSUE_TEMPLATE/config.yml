@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/zkp2p/peer-cash-snap/security/advisories/new
+    about: Report privately. Never open a public issue for a security problem.
+  - name: Peer Cash SDK
+    url: https://www.npmjs.com/package/@zkp2p/cash
+    about: Issues in the underlying offramp SDK rather than the snap.
