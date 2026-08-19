@@ -1,7 +1,11 @@
 # MetaMask Snaps Directory submission
 
-Everything needed to get `@zkp2p/peer-cash-snap` allowlisted. Nothing here has
-been submitted — filing the form is a human step.
+Everything needed to get `@zkp2p/peer-cash-snap` allowlisted.
+
+**Submitted 19 Aug 2026 for version 0.1.1.** The allowlist request went in
+through the Typeform below and returned the confirmation screen: "It may take up
+to one month for your request to be reviewed." See
+[Submission record](#submission-record) for exactly what was sent.
 
 | File                                       | What it is                                                        |
 | ------------------------------------------ | ----------------------------------------------------------------- |
@@ -26,6 +30,29 @@ form's own confirmation screen says review takes up to a month.
 Every published version needs its own update-request form: the registry pins
 per-version checksums, and users cannot install a version that is not
 allowlisted.
+
+## Submission record
+
+| Field                         | Sent                                                |
+| ----------------------------- | --------------------------------------------------- |
+| Date                          | 19 Aug 2026                                         |
+| Version                       | 0.1.1                                               |
+| Form                          | `snaps-request` (new snap), 26 fields               |
+| Promotional images            | `images/1.png`, `2.png`, `3.png`, uploaded in order |
+| Audit URL and upload (14, 15) | Left blank, no key-management permissions           |
+| Demo video (23)               | Left blank, optional                                |
+| Follow-up contact (26)        | `support@peer.xyz, or @andrewwilkinson on X`        |
+
+Every other field went in verbatim from [`ALLOWLIST-FORM.md`](./ALLOWLIST-FORM.md).
+
+Field 12 was the one real gate, and it is now answered honestly: the snap was
+installed from npm in MetaMask Flask through the Snap Install Tester before the
+form was filed. What that run proved is recorded in
+[`FLASK-E2E.md`](./FLASK-E2E.md#what-was-verified-under-flask).
+
+**Next time this changes:** every published version needs its own
+update-request form, and the registry pins per-version checksums, so 0.1.2 is
+not installable by users until it is separately allowlisted.
 
 ## Why allowlisting is needed
 

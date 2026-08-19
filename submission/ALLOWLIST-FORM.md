@@ -6,8 +6,7 @@ Form: <https://go.metamask.io/snaps-directory-request>
 No field on the form enforces a character limit. Lengths below are tuned to the
 live registry corpus (summaries average 67 chars, descriptions 716).
 
-Fields marked **NEEDS ANDREW** cannot be answered without a decision or a step
-only a human can perform.
+Filed 19 Aug 2026 for 0.1.1. Every field below went in as written.
 
 ---
 
@@ -94,9 +93,14 @@ pass.
 
 **12. Tested with Snap Install Tester in Flask?** _(required checkbox)_
 
-**NEEDS ANDREW** — requires a Flask session.
-<https://montoya.github.io/snap-install-tester/>. Covered as the last step of
-[`FLASK-E2E.md`](./FLASK-E2E.md).
+Yes, verified 19 Aug 2026 before filing. MetaMask Flask 13.44.0-flask.0 in a
+throwaway profile, snap installed from npm through
+<https://montoya.github.io/snap-install-tester/> as
+`npm:@zkp2p/peer-cash-snap`. The four things the field's helper text asks about
+all held: the version resolved as 0.1.1, the Peer icon rendered, the name and
+description showed in the Snaps settings menu, and the `page-home` view
+rendered its real empty state. Evidence in
+[`FLASK-E2E.md`](./FLASK-E2E.md#what-was-verified-under-flask).
 
 **13. Is the icon for your Snap correct?** _(required checkbox)_
 
@@ -167,8 +171,8 @@ provide exactly 3 images."
 
 **23. Snap demo video or tutorial video** _(optional)_ — URL field, not an upload
 
-**NEEDS ANDREW.** Optional, and there is no specified length, format, or
-platform. It must be hosted somewhere and supplied as a URL, and it never enters
+**Left blank on the 19 Aug filing.** Optional, and there is no specified length,
+format, or platform. It must be hosted somewhere and supplied as a URL, and it never enters
 the registry data — MetaMask uses it for review and possibly marketing.
 
 A real demo has to show the snap UI inside MetaMask, which means Flask driving
@@ -188,7 +192,13 @@ P2P Labs Inc. — the legal entity named in the clients' `COMPANY_INFO`.
 
 **26. How can we follow up with you?** _(optional)_
 
-**NEEDS ANDREW** — whichever contact he prefers for review follow-up.
+```
+support@peer.xyz, or @andrewwilkinson on X
+```
+
+Both routes given deliberately: the form warns MetaMask may need to reach us to
+proceed with allowlisting, and the X handle does not depend on `peer.xyz` mail
+routing, which has never been verified end to end.
 
 ---
 
@@ -267,6 +277,6 @@ High-rated dynamic check — cannot run here at all, because it hard-requires
 - [x] Three 960×540 promotional images
 - [x] Published to npm — `@zkp2p/peer-cash-snap@0.1.1`
 - [x] Repo public
-- [ ] Snap Install Tester run under Flask
+- [x] Snap Install Tester run under Flask (19 Aug 2026, Flask 13.44.0-flask.0)
 - [x] Escalation contact confirmed — `support@peer.xyz`
-- [ ] Demo video _(optional)_
+- [ ] Demo video _(optional, left blank)_

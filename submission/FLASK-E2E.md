@@ -1,8 +1,70 @@
 # Live end-to-end under MetaMask Flask
 
 Proves the maker lifecycle against production: cash out → `awaiting-buyer` →
-withdraw → `returned`. Everything that can be verified without a wallet is done;
-what remains needs hands on a wallet.
+withdraw → `returned`.
+
+The install half of this runbook has since been run and passed, headlessly, and
+its result is what field 12 of the allowlist form attests to. See
+[What was verified under Flask](#what-was-verified-under-flask). The remaining
+half moves real USDC and is still unrun.
+
+---
+
+## What was verified under Flask
+
+Run 19 Aug 2026, before the allowlist form was filed. No funds moved, no key was
+imported, and no private key was entered anywhere.
+
+**Setup.** MetaMask Flask 13.44.0-flask.0, the official
+`metamask-chrome-13.44.0-flask.0.zip` release build, unpacked and loaded into a
+throwaway Chromium profile driven by Playwright under Xvfb. A fresh wallet was
+created through onboarding (SRP path, backup skipped, no funds). Two things are
+worth writing down for anyone repeating this:
+
+- **Chrome will not do this any more; Chromium will.** Chrome 151 no longer
+  honours `--load-extension`, so an unpacked Flask silently fails to load and
+  `chrome://extensions` shows nothing. Debian's `/usr/bin/chromium` at the same
+  151 build still honours it.
+- **LavaMoat scuttling blocks `page.evaluate` on extension pages.** Any main
+  world evaluate throws `property "setInterval" of globalThis is inaccessible
+under scuttling mode`. Playwright locators and `page.content()` work fine, so
+  drive the UI through those and read the DOM from raw HTML. Do not patch the
+  extension to work around it.
+
+**Install, through the Snap Install Tester.**
+<https://montoya.github.io/snap-install-tester/> with snap ID
+`npm:@zkp2p/peer-cash-snap` and version `0.1.1`. Every screen rendered:
+
+| Screen                       | What it showed                                                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Connection request           | "montoya.github.io wants to use @zkp2p/peer-cash-snap", behind the third-party software notice modal                |
+| Install permissions          | "Access the internet", "Allow websites to communicate directly with Peer Cash", "Display a custom screen"           |
+| Result                       | "Installation complete. Peer Cash is ready to use"                                                                  |
+| `onInstall` lifecycle dialog | Heading "Peer Cash installed", the full welcome copy, and the copyable `https://peer-cash-snap.vercel.app`          |
+| Snaps settings list          | "Peer Cash" with `@zkp2p/peer-cash-snap` underneath, brand icon rendering on light background                       |
+| `page-home` view             | Heading "Peer Cash", "Cash out Base USDC to fiat at the live market rate.", the empty state, and the Refresh button |
+
+No environment warning banner, which is correct: production is the default.
+
+`wallet_getSnaps` from the dapp returned the installed snap at version `0.1.1`,
+`enabled: true`, `blocked: false`, with all eight `initialPermissions` byte for
+byte identical to `snap.manifest.json`. That also settles the manifest checksum
+question: MetaMask validates `source.shasum` against the npm tarball at install
+time, and it installed, so the published `3ykr2Eg14vXKEVOBTW7pX2ew8O9NPIEiqlcVGEq+nfo=`
+is correct for 0.1.1. Do not try to reproduce it as a plain `sha256(bundle.js)`;
+the snaps checksum covers the whole file set, not the bundle alone.
+
+**One correction to step 5 below.** It expects the permission dialog to list all
+eight permissions. Flask 13.44 does not. It shows the three lines in the table
+above with a "See all permissions" expander, and the cronjob, lifecycle-hooks,
+`snap_dialog`, `snap_notify` and `snap_manageState` entries live behind it. The
+snap is requesting exactly what the manifest declares, as `wallet_getSnaps`
+confirms; only the presentation differs.
+
+**Still unrun:** steps 7 through 12, the live maker lifecycle. Those escrow and
+withdraw real USDC on Base mainnet, and nothing about the allowlist submission
+depends on them. The demo video (form field 23) depends on them too and was left
+blank.
 
 ---
 
@@ -239,9 +301,9 @@ _Video shot 7: the returned state._
 | 3. Wallet setup                        | Entering a private key or seed phrase is credential entry. I will not do it.             |
 | 9. Signing `approve` + `createDeposit` | Broadcasting a transaction that escrows real USDC is moving funds.                       |
 | 11. Signing the withdraw               | Same.                                                                                    |
-| 5, 8, 11 dialogs                       | Approving a wallet permission prompt on your behalf is consent I do not have.            |
-| 2. Installing Flask                    | Browser extension install in your profile.                                               |
-| 12. Install Tester attestation         | A truthful checkbox about something only you observed.                                   |
+| 8, 11 dialogs                          | Approving a cash-out or withdraw on your behalf is consent for moving funds.             |
+| 2. Installing Flask                    | Done headlessly 19 Aug 2026 in a throwaway profile, see above. Nothing touches yours.    |
+| 12. Install Tester attestation         | Done 19 Aug 2026 and filed, see above.                                                   |
 | Demo video                             | Needs the snap UI rendered by the Flask extension. Not reachable headlessly — see below. |
 
 ## Why the video cannot be produced headlessly
