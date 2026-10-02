@@ -6111,12 +6111,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zkp2p/cash@npm:0.4.9":
-  version: 0.4.9
-  resolution: "@zkp2p/cash@npm:0.4.9"
+"@zkp2p/cash@npm:0.7.0":
+  version: 0.7.0
+  resolution: "@zkp2p/cash@npm:0.7.0"
   dependencies:
     "@relayprotocol/relay-sdk": ^7.0.1
-    "@zkp2p/sdk": 0.12.0
+    "@zkp2p/sdk": 0.14.5
     zod: ^4.4.3
   peerDependencies:
     react: ">=18"
@@ -6124,25 +6124,25 @@ __metadata:
   peerDependenciesMeta:
     react:
       optional: true
-  checksum: 0936b213b22c8a77b3233e510cfeab5dc48056e62fc2d94fac986e6577ac36e3369d5692076e0c65c0ed16c138302df9f72449c3e51edd35aef437249f3ca1c1
+  checksum: e1c0e31766b6cc8521a430f09c726684a586d412af8091a57f585c8f48e53dd1db5dfc2bb58d5d184b0ae7f4af8bf64b8da995f1187242ce8cfa0b5c01dbe77c
   languageName: node
   linkType: hard
 
-"@zkp2p/contracts-v2@npm:0.4.0":
-  version: 0.4.0
-  resolution: "@zkp2p/contracts-v2@npm:0.4.0"
+"@zkp2p/contracts-v2@npm:0.4.3":
+  version: 0.4.3
+  resolution: "@zkp2p/contracts-v2@npm:0.4.3"
   dependencies:
     abitype: ^1.0.0
   peerDependencies:
     ethers: ^5.0.0 || ^6.0.0
-  checksum: 4873a98d89f9244d2ae2be1d507b3d84bc3d96749bf0144355728a1786f243c5c7f64911972a7e74eb5cb22514c436ce2ed1042930de5451129be7b4bfdfe43f
+  checksum: 5de3455a2c458297e958990edb018e2c0bc7d595c4a871f3f513e6aeee7c671e3a7cfe7fe4b30b22a73589222a2404797c8319dd3714282b2136c267fd09eca7
   languageName: node
   linkType: hard
 
-"@zkp2p/indexer-schema@npm:0.20.0":
-  version: 0.20.0
-  resolution: "@zkp2p/indexer-schema@npm:0.20.0"
-  checksum: cc3344307d6c8797af14ad79c122614c1f20729788894160c0c5723b76c1dc9c28fb762f2f98db311bdde7a18c4f6d299163b1eaab4082ae4912db96a4e49c53
+"@zkp2p/indexer-schema@npm:0.22.0":
+  version: 0.22.0
+  resolution: "@zkp2p/indexer-schema@npm:0.22.0"
+  checksum: 413264d1f5bd417ea5d2a28b030071e3048bb020eff5b31e96c7b5f0cca2f15f45e8e781cfd1fa91b1e492af49c4f7bd7c6f97041b8e4fe8f9d33fdd45973a8b
   languageName: node
   linkType: hard
 
@@ -6156,7 +6156,7 @@ __metadata:
     "@metamask/snaps-sdk": ~10.3.0
     "@types/react": 18.2.4
     "@types/react-dom": 18.2.4
-    "@zkp2p/cash": 0.4.9
+    "@zkp2p/cash": 0.7.0
     eslint: ^9.11.0
     jest: ^29.5.0
     rimraf: ^3.0.2
@@ -6168,13 +6168,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@zkp2p/sdk@npm:0.12.0":
-  version: 0.12.0
-  resolution: "@zkp2p/sdk@npm:0.12.0"
+"@zkp2p/sdk@npm:0.14.5":
+  version: 0.14.5
+  resolution: "@zkp2p/sdk@npm:0.14.5"
   dependencies:
-    "@zkp2p/contracts-v2": 0.4.0
-    "@zkp2p/indexer-schema": 0.20.0
-    "@zkp2p/zkp2p-attestation": 2.0.0
+    "@zkp2p/contracts-v2": 0.4.3
+    "@zkp2p/indexer-schema": 0.22.0
+    "@zkp2p/zkp2p-attestation": 3.1.0
     ethers: ^6.0.0
     ox: ^0.11.1
   peerDependencies:
@@ -6183,19 +6183,19 @@ __metadata:
   peerDependenciesMeta:
     react:
       optional: true
-  checksum: 70b8b49a1d0ac9a3f859069dcc74ab9d8026e0aca6e2c077b6bd5c3a92396d13368868ac8c6a6411dd9522826d96f72234af93d97c45a1153368ab5f483d5cc6
+  checksum: b52f49bdd52939c86c9cf4e7b253863baae54461225c2b56b7da8d93de5668387928acbf58dc19fabab5ef4b6820bbc6c52992d88799bbb7a9e6d12428e1865f
   languageName: node
   linkType: hard
 
-"@zkp2p/zkp2p-attestation@npm:2.0.0":
-  version: 2.0.0
-  resolution: "@zkp2p/zkp2p-attestation@npm:2.0.0"
+"@zkp2p/zkp2p-attestation@npm:3.1.0":
+  version: 3.1.0
+  resolution: "@zkp2p/zkp2p-attestation@npm:3.1.0"
   dependencies:
     "@peculiar/x509": ^1.14.0
     ethers: ^6.13.4
   bin:
     zkp2p-attestation-verify: dist/cli/verify.js
-  checksum: c1c3d93b1d42bfb309373b36ca06b6aba3c39a95d78c21e53fd8aab98451813c65e02d47e9c7eda2e9e47bd6b08a62756571386b8ba3d517db29b29ad79a3a19
+  checksum: 6498a1e92124cc98232c4e916e67f6d65ae1812dd2a67cbe5e60dcaa5de686f4a3040f7c0baa33142cf5db4c6bd92b8125703f1fb63f439b6666341b80f3983f
   languageName: node
   linkType: hard
 
