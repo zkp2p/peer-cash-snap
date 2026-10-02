@@ -1,8 +1,8 @@
 /**
  * Build-time stub for `@zkp2p/zkp2p-attestation`.
  *
- * `@zkp2p/sdk` imports two TEE-session encryption helpers from this package.
- * Both belong to buyer-proof and seller-credential flows the Peer Cash snap
+ * `@zkp2p/sdk` imports attestation helpers from this package.
+ * They belong to buyer-proof, dispute, and seller-credential flows the Peer Cash snap
  * never executes (the snap is maker-only: prepare, finalize, observe,
  * withdraw, top up). The real package drags in `@peculiar/x509`, which
  * imports `reflect-metadata` - a polyfill that mutates the frozen `Reflect`
@@ -36,3 +36,5 @@ export const createEncryptedSellerCredentialUpload = unavailable(
 export const createNitroAttestationClient = unavailable(
   'createNitroAttestationClient',
 );
+
+export const verifyDisputeAttestation = unavailable('verifyDisputeAttestation');
