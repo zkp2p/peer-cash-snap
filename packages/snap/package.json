@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@metamask/snaps-sdk": "~10.3.0",
-    "@zkp2p/cash": "0.4.9",
+    "@zkp2p/cash": "0.7.0",
     "viem": "~2.37.3",
     "zod": "^4.4.3"
   },
