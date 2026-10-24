@@ -8,6 +8,10 @@ jobs:
     name: Prepare
     runs-on: ubuntu-latest
     steps:
+      - name: Patch hosted action runtime
+        if: runner.environment == 'github-hosted' && runner.os == 'Linux'
+        uses: zkp2p/.github/actions/patch-node24@b5f5952aa1f7ada0a6dedfdbd320dce83d69635b
+
       - name: Checkout and setup environment
         uses: MetaMask/action-checkout-and-setup@v1
         with:
@@ -20,6 +24,10 @@ jobs:
     needs:
       - prepare
     steps:
+      - name: Patch hosted action runtime
+        if: runner.environment == 'github-hosted' && runner.os == 'Linux'
+        uses: zkp2p/.github/actions/patch-node24@b5f5952aa1f7ada0a6dedfdbd320dce83d69635b
+
       - name: Checkout and setup environment
         uses: MetaMask/action-checkout-and-setup@v1
         with:
@@ -46,6 +54,10 @@ jobs:
     needs:
       - prepare
     steps:
+      - name: Patch hosted action runtime
+        if: runner.environment == 'github-hosted' && runner.os == 'Linux'
+        uses: zkp2p/.github/actions/patch-node24@b5f5952aa1f7ada0a6dedfdbd320dce83d69635b
+
       - name: Checkout and setup environment
         uses: MetaMask/action-checkout-and-setup@v1
         with:
@@ -67,6 +79,10 @@ jobs:
       - prepare
       - build
     steps:
+      - name: Patch hosted action runtime
+        if: runner.environment == 'github-hosted' && runner.os == 'Linux'
+        uses: zkp2p/.github/actions/patch-node24@b5f5952aa1f7ada0a6dedfdbd320dce83d69635b
+
       - name: Checkout and setup environment
         uses: MetaMask/action-checkout-and-setup@v1
         with:
