@@ -30,7 +30,10 @@
     "path-to-regexp@0.1.10": "^0.1.12",
     "sharp": "^0.33.5",
     "socket.io": "^4.8.1",
-    "ws": "^8.17.1"
+    "ws": "^8.17.1",
+    "body-parser@1.20.3": "npm:1.20.9",
+    "body-parser@^2.2.0": "npm:2.4.0",
+    "multer": "npm:2.5.0"
   },
   "devDependencies": {
     "@lavamoat/allow-scripts": "^3.3.4",
