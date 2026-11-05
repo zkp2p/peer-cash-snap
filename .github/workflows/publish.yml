@@ -1,0 +1,190 @@
+name: Publish Peer Cash Snap
+
+run-name: Publish @zkp2p/peer-cash-snap@${{ inputs.version }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact SemVer committed in packages/snap/package.json on main
+        required: true
+        type: string
+      dist_tag:
+        description: 'Optional npm tag (default: latest for stable, first prerelease identifier otherwise)'
+        default: ''
+        type: string
+      allow_prerelease_latest:
+        description: Explicitly allow a prerelease to use the latest tag
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish-peer-cash-snap
+  cancel-in-progress: false
+
+env:
+  PACKAGE_NAME: '@zkp2p/peer-cash-snap'
+  RELEASE_VERSION: ${{ inputs.version }}
+  PACK_ARTIFACT: peer-cash-snap-package
+
+jobs:
+  verify:
+    name: Verify, build, and pack
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      dist_tag: ${{ steps.guard.outputs.dist_tag }}
+    steps:
+      - name: Patch hosted action runtime
+        if: runner.environment == 'github-hosted' && runner.os == 'Linux'
+        uses: zkp2p/.github/actions/patch-node24@f9560a725dbcda32544968f34d52382d3af316e5
+
+      - name: Checkout release source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - name: Guard release request before building
+        id: guard
+        env:
+          REQUESTED_TAG: ${{ inputs.dist_tag }}
+          ALLOW_PRERELEASE_LATEST: ${{ inputs.allow_prerelease_latest }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { spawnSync } from 'node:child_process';
+          import { appendFileSync, readFileSync } from 'node:fs';
+
+          assert.equal(process.env.GITHUB_REF, 'refs/heads/main', 'Publish must run from main');
+          const version = process.env.RELEASE_VERSION;
+          const numeric = '(?:0|[1-9][0-9]*)';
+          const identifier = '(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)';
+          const semver = new RegExp(`^${numeric}\\.${numeric}\\.${numeric}(?:-(${identifier}(?:\\.${identifier})*))?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$`);
+          const match = typeof version === 'string' && version.length <= 256 && version.match(semver);
+          assert(match && match[0] === version, 'version must be an exact SemVer');
+          assert(!version.includes('+'), 'npm strips build metadata; use a version without +metadata');
+          const pkg = JSON.parse(readFileSync('packages/snap/package.json', 'utf8'));
+          assert.equal(pkg.name, process.env.PACKAGE_NAME, 'Unexpected package');
+          assert.equal(pkg.version, version, 'version must equal packages/snap/package.json');
+
+          const prerelease = match[1];
+          const tag = process.env.REQUESTED_TAG || (prerelease ? prerelease.split('.')[0] : 'latest');
+          assert(tag === tag.trim() && /^[a-z][a-z0-9._-]*$/u.test(tag) && !/^v[0-9]/u.test(tag) && !/^v?x(?:\.x){0,2}$/u.test(tag), 'Use a lowercase npm dist-tag, not a version/range; set dist_tag explicitly if needed');
+          assert(!prerelease || tag !== 'latest' || process.env.ALLOW_PRERELEASE_LATEST === 'true', 'Prerelease latest requires allow_prerelease_latest=true');
+
+          const lookup = spawnSync('npm', ['view', `${pkg.name}@${version}`, 'version', '--json', '--registry=https://registry.npmjs.org', '--fetch-retries=0', '--fetch-timeout=10000'], { encoding: 'utf8', timeout: 15000 });
+          if (lookup.error) throw lookup.error;
+          if (lookup.status === 0) {
+            assert.equal(lookup.stdout.trim(), '', 'This version already exists on npm');
+          } else {
+            // Only a registry E404 proves absence; network/auth failures must stop the release.
+            const response = JSON.parse(lookup.stdout);
+            assert.equal(response.error?.code, 'E404', `Cannot establish npm version availability: ${lookup.stderr}`);
+          }
+          appendFileSync(process.env.GITHUB_OUTPUT, `dist_tag=${tag}\n`);
+          NODE
+
+      - name: Install immutable dependencies
+        run: |
+          corepack enable
+          yarn install --immutable
+
+      - name: Build and test the snap
+        # The package's test script runs its build before Jest.
+        run: yarn workspace @zkp2p/peer-cash-snap run test --runInBand
+
+      - name: Require the committed snap manifest
+        run: |
+          yarn workspace @zkp2p/peer-cash-snap exec mm-snap manifest
+          git diff --exit-code -- packages/snap/snap.manifest.json
+
+      - name: Lint the snap
+        run: |
+          yarn workspace @zkp2p/peer-cash-snap run lint:eslint
+          # Prettier is a root dependency; run the package's formatting checks there.
+          yarn prettier 'packages/snap/**/*.json' 'packages/snap/**/*.md' 'packages/snap/**/*.yml' --ignore-path .gitignore --no-error-on-unmatched-pattern --check
+
+      - name: Pack the verified bundle once
+        working-directory: packages/snap
+        run: |
+          mkdir -p "$RUNNER_TEMP/npm-pack"
+          npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP/npm-pack"
+
+      - name: Upload the exact tarball
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ env.PACK_ARTIFACT }}
+          path: ${{ runner.temp }}/npm-pack/*.tgz
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+
+  publish:
+    name: Publish with npm OIDC
+    needs: verify
+    # npm trusted publishing requires a GitHub-hosted runner.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      DIST_TAG: ${{ needs.verify.outputs.dist_tag }}
+    steps:
+      - name: Patch hosted action runtime
+        if: runner.environment == 'github-hosted' && runner.os == 'Linux'
+        uses: zkp2p/.github/actions/patch-node24@f9560a725dbcda32544968f34d52382d3af316e5
+
+      - name: Set up Node.js and npm registry
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.x
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+
+      - name: Pin OIDC-capable npm
+        run: |
+          npm install --global npm@11.9.0
+          test "$(npm --version)" = "11.9.0"
+
+      - name: Download the verified tarball
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6
+        with:
+          name: ${{ env.PACK_ARTIFACT }}
+          path: ${{ runner.temp }}/npm-pack
+
+      - name: Publish the exact tarball with provenance
+        run: |
+          files=("$RUNNER_TEMP"/npm-pack/*.tgz)
+          test "${#files[@]}" -eq 1
+          test -f "${files[0]}"
+          npm publish "${files[0]}" --access public --tag "$DIST_TAG" --provenance --ignore-scripts
+
+      - name: Verify the registry version and dist-tag
+        run: |
+          # Each lookup is bounded so retries finish in about a minute.
+          deadline=$((SECONDS + 60))
+          tag_field="dist-tags.$DIST_TAG"
+          # Bracket syntax keeps dots in a custom tag from becoming nested fields.
+          if [[ "$DIST_TAG" == *.* ]]; then tag_field="dist-tags[$DIST_TAG]"; fi
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            version=$(npm view "$PACKAGE_NAME@$RELEASE_VERSION" version --registry=https://registry.npmjs.org --fetch-retries=0 --fetch-timeout=2000) || version=''
+            tag=$(npm view "$PACKAGE_NAME" "$tag_field" --registry=https://registry.npmjs.org --fetch-retries=0 --fetch-timeout=2000) || tag=''
+            if [ "$version" = "$RELEASE_VERSION" ] && [ "$tag" = "$RELEASE_VERSION" ]; then
+              echo "Verified $PACKAGE_NAME@$RELEASE_VERSION ($DIST_TAG)"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'npm version or dist-tag did not converge within 60 seconds' >&2
+          exit 1
