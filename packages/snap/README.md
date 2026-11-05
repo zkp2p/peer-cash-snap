@@ -104,6 +104,14 @@ yarn start   # snap on :8080, dapp on :8000
 yarn test    # @metamask/snaps-jest against the built bundle
 ```
 
+## Publishing
+
+Releases use `.github/workflows/publish.yml` from `main` with npm trusted
+publishing (OIDC). Bump the version and rebuild the manifest in a PR, merge,
+then dispatch the workflow and verify npm. Local `npm publish` is rejected.
+See the repository's
+[publishing guide](https://github.com/zkp2p/peer-cash-snap/blob/main/PUBLISHING.md).
+
 ## License
 
 Dual licensed under [MIT-0](./LICENSE.MIT0) or

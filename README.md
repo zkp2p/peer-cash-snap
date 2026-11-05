@@ -150,6 +150,13 @@ restricted-rail refusal, parameter validation, the environment-switch dialog
 flow, home page rendering, and the cron entry point. Live-infrastructure
 flows are covered by the staging procedure above.
 
+## Publishing
+
+Bump the snap version and rebuild its manifest in a PR, merge to `main`, then
+run `.github/workflows/publish.yml` from `main`. Publishing uses npm trusted
+publishing (OIDC); local `npm publish` is rejected. See
+[PUBLISHING.md](./PUBLISHING.md) for setup, dispatch, and verification.
+
 ## SES bundling notes
 
 Snaps run under [SES lockdown](https://github.com/endojs/endo), which freezes
