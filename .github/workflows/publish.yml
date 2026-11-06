@@ -133,7 +133,7 @@ jobs:
     needs: verify
     # npm trusted publishing requires a GitHub-hosted runner.
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 20
     environment: npm-publish
     permissions:
       contents: read
@@ -172,8 +172,8 @@ jobs:
 
       - name: Verify the registry version and dist-tag
         run: |
-          # Each lookup is bounded so retries finish in about a minute.
-          deadline=$((SECONDS + 60))
+          # Each lookup is bounded so retries finish in about 10 minutes.
+          deadline=$((SECONDS + 600))
           tag_field="dist-tags.$DIST_TAG"
           # Bracket syntax keeps dots in a custom tag from becoming nested fields.
           if [[ "$DIST_TAG" == *.* ]]; then tag_field="dist-tags[$DIST_TAG]"; fi
@@ -186,5 +186,5 @@ jobs:
             fi
             sleep 5
           done
-          echo 'npm version or dist-tag did not converge within 60 seconds' >&2
+          echo 'npm version or dist-tag did not converge within 10 minutes' >&2
           exit 1
