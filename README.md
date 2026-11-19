@@ -14,7 +14,7 @@ notifications.
 
 MetaMask snaps cannot sign or submit transactions (`eth_sendTransaction` is
 unavailable to snaps), and `@zkp2p/cash` was designed for exactly this
-custody split: every mutation has an unsigned-plan path.
+custody split: deposits, withdrawals and top-ups have unsigned-plan paths.
 
 ```text
 ┌────────────┐  wallet_invokeSnap   ┌─────────────────────────────┐
@@ -75,13 +75,17 @@ Errors keep Peer Cash's typed shape: the snap forwards `code`, `retryable`,
 
 ### Payout rails
 
-- **Venmo, Cash App, PayPal are refused** with a clear remediation: they
-  require an atomic access policy only first-party Peer hosts can configure.
-  The snap pre-flights this locally and re-checks the SDK's
-  `accessPolicyRequired` flag after `prepare()` as the authoritative backstop.
-- **Wise and PayPal identity attestations** cannot be minted here; an
-  existing Peer-registered handle can be reused (`PAYEE_VERIFICATION_REQUIRED`
-  otherwise).
+In Snap 0.1.1, `cash_getCapabilities` marks Venmo, Cash App and PayPal as
+`restricted: true`. The companion dapp hides those entries and the Snap refuses
+to prepare a cash-out on them. Read each unrestricted platform's `currencies`
+for available pairs. The published Snap bundles Cash 0.4.9. Reuse an already
+registered Wise payee when a new handle requires identity verification.
+
+For `cash_prepareCashout`, supply each leg's `platform`, `payee` and either
+`currency` or `currencies`. The response contains `plan` and `meta`. After the
+create-deposit transaction confirms, pass its `receipt` with `meta.owner`,
+`meta.amountUsdc` and `meta.legs` to `cash_finalizeCashout`. Finalization
+returns `result.depositId` and tracks that order.
 
 ## Snap permissions
 
@@ -92,7 +96,7 @@ Errors keep Peer Cash's typed shape: the snap forwards `code`, `retryable`,
 | `endowment:page-home`       | Order dashboard inside MetaMask                                                                                           |
 | `endowment:cronjob` (5 min) | Background order refresh                                                                                                  |
 | `endowment:lifecycle-hooks` | Welcome dialog on install                                                                                                 |
-| `snap_dialog`               | Approval dialogs for every mutation                                                                                       |
+| `snap_dialog`               | Confirm transaction plans and environment changes                                                                         |
 | `snap_notify`               | In-app notifications on order state changes                                                                               |
 | `snap_manageState`          | Tracked orders (unencrypted: public protocol data only — deposit ids, amounts, states; payee handles are never persisted) |
 
