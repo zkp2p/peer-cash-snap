@@ -96,7 +96,7 @@ returns `result.depositId` and tracks that order.
 | `endowment:page-home`       | Order dashboard inside MetaMask                                                                                           |
 | `endowment:cronjob` (5 min) | Background order refresh                                                                                                  |
 | `endowment:lifecycle-hooks` | Welcome dialog on install                                                                                                 |
-| `snap_dialog`               | Approval dialogs for transaction plans and environment changes                                                                                       |
+| `snap_dialog`               | Confirm transaction plans and environment changes                                                                         |
 | `snap_notify`               | In-app notifications on order state changes                                                                               |
 | `snap_manageState`          | Tracked orders (unencrypted: public protocol data only — deposit ids, amounts, states; payee handles are never persisted) |
 
