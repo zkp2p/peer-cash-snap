@@ -64,9 +64,11 @@ Errors keep Peer Cash's typed shape: `code`, `retryable`, `remediation`, and
 
 ### Payout rails
 
-Snap 0.1.1 excludes Venmo, Cash App and PayPal from its payout list and refuses
-plans that need the legacy access-policy transaction. Use
-`cash_getCapabilities` for this Snap's supported platforms and currencies. The published Snap bundles Cash 0.4.9. Reuse an already registered Wise payee when a new handle requires identity verification.
+In Snap 0.1.1, `cash_getCapabilities` marks Venmo, Cash App and PayPal as
+`restricted: true`. The companion dapp hides those entries and the Snap refuses
+to prepare a cash-out on them. Read each unrestricted platform's `currencies`
+for available pairs. The published Snap bundles Cash 0.4.9. Reuse an already
+registered Wise payee when a new handle requires identity verification.
 
 For `cash_prepareCashout`, supply each leg's `platform`, `payee` and either
 `currency` or `currencies`. The response contains `plan` and `meta`. After the
