@@ -10,8 +10,8 @@ Hosted at https://peer-cash-snap.vercel.app.
 
 Snaps cannot call `eth_sendTransaction`. The snap owns `@zkp2p/cash`, the
 confirmation dialogs, and order state; this dapp owns the wallet connection
-and transaction submission. Every mutation is approved twice — once in the
-snap's dialog, once per transaction in MetaMask.
+and transaction submission. For a deposit, withdrawal or top-up, the user confirms the plan in the
+snap and then approves each transaction in MetaMask.
 
 ## Scripts
 

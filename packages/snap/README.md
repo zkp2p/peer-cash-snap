@@ -28,7 +28,7 @@ Companion dapp: https://peer-cash-snap.vercel.app
 
 Snaps cannot sign or submit transactions (`eth_sendTransaction` is
 unavailable to them), and `@zkp2p/cash` was designed for exactly this custody
-split: every mutation has an unsigned-plan path.
+split: deposits, withdrawals and top-ups have unsigned-plan paths.
 
 1. The dapp calls a `cash_prepare*` method.
 2. The snap shows a confirmation dialog (amount, platform, payee, estimate)
@@ -64,10 +64,15 @@ Errors keep Peer Cash's typed shape: `code`, `retryable`, `remediation`, and
 
 ### Payout rails
 
-Venmo, Cash App, and PayPal are refused with a clear remediation: they require
-an atomic access policy only first-party Peer hosts can configure. The snap
-pre-flights this locally and re-checks the SDK's `accessPolicyRequired` flag
-after `prepare()` as the authoritative backstop.
+Snap 0.1.1 excludes Venmo, Cash App and PayPal from its payout list and refuses
+plans that need the legacy access-policy transaction. Use
+`cash_getCapabilities` for this Snap's supported platforms and currencies. The published Snap bundles Cash 0.4.9. Reuse an already registered Wise payee when a new handle requires identity verification.
+
+For `cash_prepareCashout`, supply each leg's `platform`, `payee` and either
+`currency` or `currencies`. The response contains `plan` and `meta`. After the
+create-deposit transaction confirms, pass its `receipt` with `meta.owner`,
+`meta.amountUsdc` and `meta.legs` to `cash_finalizeCashout`. Finalization
+returns `result.depositId` and tracks that order.
 
 ## Permissions
 
@@ -78,7 +83,7 @@ after `prepare()` as the authoritative backstop.
 | `endowment:page-home`       | Order dashboard inside MetaMask                         |
 | `endowment:cronjob` (5 min) | Background order refresh                                |
 | `endowment:lifecycle-hooks` | Welcome dialog on install                               |
-| `snap_dialog`               | Approval dialogs for every mutation                     |
+| `snap_dialog`               | Approval dialogs for transaction plans and environment changes                     |
 | `snap_notify`               | In-app notifications on order state changes             |
 | `snap_manageState`          | Tracked orders (unencrypted; public protocol data only) |
 
